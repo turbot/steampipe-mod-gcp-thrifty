@@ -22,10 +22,24 @@ benchmark "compute" {
 }
 
 control "compute_disk_balanced_persistent" {
-  title         = "SSD persistent (pd-ssd) disks should be replaced with balanced persistent (pd-balanced) disks."
-  description   = "Balanced persistent (pd-balanced) disks are backed by solid-state drives (SSD). They are an alternative to SSD persistent disks that balance performance and cost. It is recommended to use balanced persistent (pd-balanced) disks instead of SSD persistent(pd-ssd) disks."
-  sql           = query.compute_disk_balanced_persistent.sql
-  severity      = "low"
+  title       = "SSD persistent (pd-ssd) disks should be replaced with balanced persistent (pd-balanced) disks."
+  description = "Balanced persistent (pd-balanced) disks are backed by solid-state drives (SSD). They are an alternative to SSD persistent disks that balance performance and cost. It is recommended to use balanced persistent (pd-balanced) disks instead of SSD persistent(pd-ssd) disks."
+  severity    = "low"
+
+  sql = <<-EOT
+    select
+      self_link as resource,
+      case
+        when type_name = 'pd-ssd' then 'alarm'
+        when type_name = 'pd-balanced' then 'ok'
+        else 'skip'
+      end as status,
+      title || ' is ' || type_name || '.' as reason,
+      project
+    from
+      gcp_compute_disk;
+  EOT
+
   tags = merge(local.compute_common_tags, {
     class = "deprecated"
   })
