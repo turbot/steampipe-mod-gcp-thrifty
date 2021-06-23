@@ -9,5 +9,4 @@ select
 from
   gcp_compute_instance
 where
-  -- Instance is running
   status in ('PROVISIONING', 'STAGING', 'RUNNING','REPAIRING');

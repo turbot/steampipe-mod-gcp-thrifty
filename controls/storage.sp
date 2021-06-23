@@ -6,7 +6,7 @@ locals {
 
 benchmark "storage" {
   title         = "Storage Checks"
-  description   = "Thrifty developers eliminate unused and under-utilized storage buckets."
+  description   = "Thrifty developers ensure their storage buckets are multi regional and have managed life-cycles."
   #documentation = file("./controls/docs/storage.md") #TODO
   tags          = local.storage_common_tags
   children = [
@@ -17,7 +17,7 @@ benchmark "storage" {
 
 control "storage_bucket_without_lifecycle_policy" {
   title         = "Storage buckets with no lifecycle policy should be reviewed"
-  description   = "Are there any Storage buckets with no life cycle policy?."
+  description   = "Storage Buckets should have a life cycle policy associated for data retention."
   sql           = query.storage_bucket_without_lifecycle_policy.sql
   severity      = "low"
   tags = merge(local.storage_common_tags, {

@@ -13,7 +13,7 @@ benchmark "compute" {
     control.compute_disk_balanced_persistent,
     control.compute_disk_attached_stopped_instance,
     control.compute_disk_large,
-    control.compute_disk_age_90,
+    control.compute_snapshot_age_90,
     control.compute_unattached_disk,
     control.compute_unattached_ip_address,
     control.compute_long_running_instances,
@@ -23,7 +23,7 @@ benchmark "compute" {
 
 control "compute_disk_balanced_persistent" {
   title         = "SSD persistent (pd-ssd) disks should be replaced with balanced persistent (pd-balanced) disks."
-  description   = "Balanced persistent (pd-balanced) disks are backed by solid-state drives (SSD). They are an alternative to SSD persistent disks that balance performance and cost. It is recommended to use balanced persistent (pd-balanced) disks instead of SSD persistent (pd-ssd) disks "
+  description   = "Balanced persistent (pd-balanced) disks are backed by solid-state drives (SSD). They are an alternative to SSD persistent disks that balance performance and cost. It is recommended to use balanced persistent (pd-balanced) disks instead of SSD persistent(pd-ssd) disks."
   sql           = query.compute_disk_balanced_persistent.sql
   severity      = "low"
   tags = merge(local.compute_common_tags, {
@@ -33,7 +33,7 @@ control "compute_disk_balanced_persistent" {
 
 control "compute_disk_attached_stopped_instance" {
   title         = "Disks attached to stopped instances should be reviewed"
-  description   = "Disks attached to stopped instances should be reviewed"
+  description   = "Instances that are stopped may no longer need any disks attached."
   sql           = query.compute_disk_attached_stopped_instance.sql
   severity      = "low"
   tags = merge(local.compute_common_tags, {
@@ -51,9 +51,9 @@ control "compute_disk_large" {
   })
 }
 
-control "compute_disk_age_90" {
+control "compute_snapshot_age_90" {
   title         = "Snapshots created over 90 days ago should be deleted if not required"
-  description   = "Which disks are only attached to stopped compute instances?"
+  description   = "Old snapshots are likely unneeded and costly to maintain."
   sql           = query.compute_snapshot_age_90.sql
   severity      = "low"
   tags = merge(local.compute_common_tags, {
@@ -63,7 +63,7 @@ control "compute_disk_age_90" {
 
 control "compute_unattached_disk" {
   title         = "Unused compute disks should be removed"
-  description   = "Are there any unattached compute disks?."
+  description   = "Unattached compute disks are charged by GCP, they should be removed unless there is a business need to retain them."
   sql           = query.compute_unattached_disk.sql
   severity      = "low"
   tags = merge(local.storage_common_tags, {
@@ -73,7 +73,7 @@ control "compute_unattached_disk" {
 
 control "compute_unattached_ip_address" {
   title         = "Unused external IP addresses should be removed"
-  description   = "Are there any unattached external IP addresses?."
+  description   = "Unattached external IPs are charged, they should be released."
   sql           = query.compute_unattached_ip_address.sql
   severity      = "low"
   tags = merge(local.storage_common_tags, {
@@ -93,7 +93,7 @@ control "compute_long_running_instances" {
 
 control "compute_disk_extreme_persistent_disk" {
   title         = "SSD persistent (pd-ssd) disks should be replaced with extreme persistent disks"
-  description   = "Still using SSD persistent ? Should use extreme persistent instead for higher performance."
+  description   = "SSD persistent disk should use extreme persistent instead for higher performance."
   sql           = query.compute_disk_extreme_persistent_disk.sql
   severity      = "low"
   tags = merge(local.storage_common_tags, {
