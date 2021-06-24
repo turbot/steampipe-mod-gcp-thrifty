@@ -1,8 +1,5 @@
 locals {
   thrifty_common_tags = {
-    plugin      = "gcp"
+    plugin = "gcp"
   }
-  required_gcp_tags = [
-    "gcp:createdBy"
-  ]
 }
