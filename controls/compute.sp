@@ -6,19 +6,19 @@ locals {
 
 benchmark "compute" {
   title         = "Compute Checks"
-  description   = "Thrifty developers eliminate unused and under-utilized compute instances."
+  description   = "Thrifty developers eliminate unused and under-utilized Compute resources."
   documentation = file("./controls/docs/compute.md")
   tags          = local.compute_common_tags
   children = [
+    control.compute_address_unattached,
     control.compute_disk_attached_stopped_instance,
     control.compute_disk_balanced_persistent,
     control.compute_disk_extreme_persistent_disk,
     control.compute_disk_large,
+    control.compute_disk_unattached,
     control.compute_instance_large,
-    control.compute_long_running_instances,
+    control.compute_instance_long_running,
     control.compute_snapshot_age_90,
-    control.compute_unattached_disk,
-    control.compute_unattached_ip_address,
   ]
 }
 
@@ -64,7 +64,7 @@ control "compute_disk_balanced_persistent" {
         when type_name = 'pd-balanced' then 'ok'
         else 'skip'
       end as status,
-      title || ' is ' || type_name || '.' as reason,
+      title || ' type is ' || type_name || '.' as reason,
       project
     from
       gcp_compute_disk;
@@ -111,7 +111,7 @@ control "compute_disk_large" {
         when size_gb <= 100 then 'ok'
         else 'alarm'
       end as status,
-      title || ' is ' || size_gb || 'GB.' as reason,
+      title || ' has ' || size_gb || 'GB.' as reason,
       project
     from
       gcp_compute_disk;
@@ -147,7 +147,7 @@ control "compute_instance_large" {
 }
 
 control "compute_long_running_instances" {
-  title         = "Long running compute instances should be reviewed"
+  title         = "Long running instances should be reviewed"
   description   = "Instances should ideally be ephemeral and rehydrated frequently, check why these instances have been running for so long."
   severity      = "low"
 
@@ -158,7 +158,7 @@ control "compute_long_running_instances" {
         when date_part('day', now() - creation_timestamp) > 90 then 'alarm'
         else 'ok'
       end as status,
-      title || ' has been running ' || date_part('day', now() - creation_timestamp) || ' days.' as reason,
+      title || ' has been running for ' || date_part('day', now() - creation_timestamp) || ' day(s).' as reason,
       project
     from
       gcp_compute_instance
@@ -190,13 +190,13 @@ control "compute_snapshot_age_90" {
   EOT
 
   tags = merge(local.compute_common_tags, {
-    class = "deprecated"
+    class = "unused"
   })
 }
 
-control "compute_unattached_disk" {
-  title         = "Unused compute disks should be removed"
-  description   = "Unattached compute disks are charged by GCP, they should be removed unless there is a business need to retain them."
+control "compute_disk_unattached" {
+  title         = "Unused disks should be removed"
+  description   = "Unattached disks cost money and should be removed unless there is a business need to retain them."
   severity      = "low"
 
   sql = <<-EOT
@@ -216,13 +216,13 @@ control "compute_unattached_disk" {
   EOT
 
   tags = merge(local.storage_common_tags, {
-    class = "deprecated"
+    class = "unused"
   })
 }
 
-control "compute_unattached_ip_address" {
+control "compute_address_unattached" {
   title         = "Unused external IP addresses should be removed"
-  description   = "Unattached external IPs are charged, they should be released."
+  description   = "Unattached external IPs cost money and should be released."
   severity      = "low"
 
   sql = <<-EOT
@@ -242,6 +242,6 @@ control "compute_unattached_ip_address" {
   EOT
 
   tags = merge(local.storage_common_tags, {
-    class = "deprecated"
+    class = "unused"
   })
 }
