@@ -6,7 +6,7 @@ locals {
 
 benchmark "storage" {
   title         = "Storage Checks"
-  description   = "Thrifty developers ensure their storage buckets are multi regional and have managed life-cycles."
+  description   = "Thrifty developers ensure their storage buckets are multi-regional and have managed lifecycles."
   documentation = file("./controls/docs/storage.md")
   tags          = local.storage_common_tags
   children = [
@@ -16,8 +16,8 @@ benchmark "storage" {
 }
 
 control "storage_bucket_multi_regional" {
-  title         = "Storage bucket should be multi regional"
-  description   = "Storage bucket should be multi regional to minimize storage bucket deduplication."
+  title         = "Storage buckets should be multi-regional"
+  description   = "Storage buckets should be multi-regional to increase availability and geo-redundancy."
   severity      = "low"
 
   sql = <<-EOT
@@ -37,13 +37,13 @@ control "storage_bucket_multi_regional" {
   EOT
 
   tags = merge(local.storage_common_tags, {
-    class = "deprecated"
+    class = "managed"
   })
 }
 
 control "storage_bucket_without_lifecycle_policy" {
   title         = "Storage buckets with no lifecycle policy should be reviewed"
-  description   = "Storage Buckets should have a life cycle policy associated for data retention."
+  description   = "Storage buckets should have a lifecycle policy associated for data retention."
   severity      = "low"
 
   sql = <<-EOT
@@ -54,8 +54,8 @@ control "storage_bucket_without_lifecycle_policy" {
         else 'ok'
       end as status,
       case
-        when lifecycle_rules is null then name || ' has no life cycle policy.'
-        else name || ' has life cycle policy.'
+        when lifecycle_rules is null then name || ' has no lifecycle policy.'
+        else name || ' has lifecycle policy.'
       end as reason,
       project
     from
@@ -63,6 +63,6 @@ control "storage_bucket_without_lifecycle_policy" {
   EOT
 
   tags = merge(local.storage_common_tags, {
-    class = "deprecated"
+    class = "managed"
   })
 }
