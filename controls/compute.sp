@@ -146,7 +146,7 @@ control "compute_instance_large" {
   })
 }
 
-control "compute_long_running_instances" {
+control "compute_instance_long_running" {
   title         = "Long running Compute instances should be reviewed"
   description   = "Instances should ideally be ephemeral and rehydrated frequently, check why these instances have been running for so long."
   severity      = "low"
