@@ -7,7 +7,7 @@ locals {
 benchmark "compute" {
   title         = "Compute Checks"
   description   = "Thrifty developers eliminate unused and under-utilized compute instances."
-  #documentation = file("./controls/docs/compute.md") #TODO
+  documentation = file("./controls/docs/compute.md") #TODO
   tags          = local.compute_common_tags
   children = [
     control.compute_disk_attached_stopped_instance,

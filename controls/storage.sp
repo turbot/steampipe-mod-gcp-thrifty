@@ -7,7 +7,7 @@ locals {
 benchmark "storage" {
   title         = "Storage Checks"
   description   = "Thrifty developers ensure their storage buckets are multi regional and have managed life-cycles."
-  #documentation = file("./controls/docs/storage.md") #TODO
+  documentation = file("./controls/docs/storage.md") #TODO
   tags          = local.storage_common_tags
   children = [
     control.storage_bucket_multi_regional,
