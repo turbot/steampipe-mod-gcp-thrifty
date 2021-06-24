@@ -15,7 +15,7 @@ benchmark "bigquery" {
 }
 
 control "bigquery_table_stale_data" {
-  title       = "BigQuery tables with stale data should be reviewed"
+  title       = "Tables with stale data should be reviewed"
   description = "If the data has not changed in 90 days, the table should be reviewed."
   severity    = "low"
 
@@ -23,7 +23,7 @@ control "bigquery_table_stale_data" {
     select
       self_link as resource,
       case
-        when date_part('day', now() -(last_modified_time :: timestamptz)) > 90 then 'alarm'
+        when date_part('day', now() -(last_modified_time :: timestamptz)) > 90 then 'info'
         else 'ok'
       end as status,
       title || ' was changed ' || date_part('day', now() -(last_modified_time :: timestamptz)) || ' days ago.'

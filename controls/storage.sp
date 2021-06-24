@@ -15,8 +15,8 @@ benchmark "storage" {
 }
 
 control "storage_bucket_without_lifecycle_policy" {
-  title         = "Storage buckets with no lifecycle policy should be reviewed"
-  description   = "Storage buckets should have a lifecycle policy associated for data retention."
+  title         = "Buckets should have lifecycle policies"
+  description   = "Buckets should have a lifecycle policy associated for data retention."
   severity      = "low"
 
   sql = <<-EOT

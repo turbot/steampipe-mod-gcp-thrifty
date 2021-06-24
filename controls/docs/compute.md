@@ -1,6 +1,6 @@
 ## Thrifty Compute Benchmark
 
-Thrifty developers eliminate their unused and under-utilized compute instances. This benchmark focuses on finding resources that have not been restarted recently,  are using low performance disks and very large instance sizes, have old snapshots, and have unused disks and IP addresses.
+Thrifty developers eliminate their unused and under-utilized compute instances. This benchmark focuses on finding resources that have not been restarted recently, are using very large instance sizes, have old snapshots, and have unused disks and IP addresses.
 
 ### Default Thresholds
 
