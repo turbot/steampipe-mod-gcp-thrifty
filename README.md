@@ -30,7 +30,7 @@ Run all benchmarks:
 steampipe check all
 ```
 
-![image](https://github.com/turbot/steampipe-mod-gcp-thrifty/blob/main/docs/thrifty-output.png?raw=true)
+![image](https://raw.githubusercontent.com/turbot/steampipe-mod-gcp-thrifty/main/docs/gcp-thrifty-console-graphic.png)
 
 Your can also run a specific controls:
 ```shell
