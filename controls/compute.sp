@@ -55,12 +55,12 @@ control "compute_disk_attached_stopped_instance" {
     select
       d.self_link as resource,
       case
-        when d.users is null then 'info'
+        when d.users is null then 'skip'
         when i.status = 'RUNNING' then 'ok'
         else 'info'
       end as status,
       case
-        when d.users is null then d.name || ' not attached.'
+        when d.users is null then d.name || ' not attached to instance.'
         when i.status = 'RUNNING' then d.name || ' attached to running instance.'
         else d.name || ' not attached to running instance.'
       end as reason,
