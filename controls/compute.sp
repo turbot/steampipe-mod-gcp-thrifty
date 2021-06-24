@@ -10,15 +10,44 @@ benchmark "compute" {
   #documentation = file("./controls/docs/compute.md") #TODO
   tags          = local.compute_common_tags
   children = [
-    control.compute_disk_balanced_persistent,
     control.compute_disk_attached_stopped_instance,
+    control.compute_disk_balanced_persistent,
+    control.compute_disk_extreme_persistent_disk,
     control.compute_disk_large,
+    control.compute_long_running_instances,
     control.compute_snapshot_age_90,
     control.compute_unattached_disk,
     control.compute_unattached_ip_address,
-    control.compute_long_running_instances,
-    control.compute_disk_extreme_persistent_disk,
   ]
+}
+
+control "compute_disk_attached_stopped_instance" {
+  title         = "Disks attached to stopped instances should be reviewed"
+  description   = "Instances that are stopped may no longer need any disks attached."
+  severity      = "low"
+
+  sql = <<-EOT
+    select
+      d.self_link as resource,
+      case
+        when d.users is null then 'info'
+        when i.status = 'RUNNING' then 'ok'
+        else 'alarm'
+      end as status,
+      case
+        when d.users is null then d.name || ' not attached.'
+        when i.status = 'RUNNING' then d.name || ' attached to running instance.'
+        else d.name || ' not attached to running instance.'
+      end as reason,
+      d.project
+    from
+      gcp_compute_disk as d
+      left join gcp_compute_instance as i on d.users ?& ARRAY [i.self_link];
+  EOT
+
+  tags = merge(local.compute_common_tags, {
+    class = "deprecated"
+  })
 }
 
 control "compute_disk_balanced_persistent" {
@@ -45,12 +74,26 @@ control "compute_disk_balanced_persistent" {
   })
 }
 
-control "compute_disk_attached_stopped_instance" {
-  title         = "Disks attached to stopped instances should be reviewed"
-  description   = "Instances that are stopped may no longer need any disks attached."
-  sql           = query.compute_disk_attached_stopped_instance.sql
+control "compute_disk_extreme_persistent_disk" {
+  title         = "SSD persistent (pd-ssd) disks should be replaced with extreme persistent disks"
+  description   = "SSD persistent disk should use extreme persistent instead for higher performance."
   severity      = "low"
-  tags = merge(local.compute_common_tags, {
+
+  sql = <<-EOT
+    select
+      self_link as resource,
+      case
+        when type_name = 'pd-ssd' then 'alarm'
+        when type_name = 'pd-extreme' then 'ok'
+        else 'skip'
+      end as status,
+      title || ' type is ' || type_name || '.' as reason,
+      project
+    from
+      gcp_compute_disk;
+  EOT
+
+  tags = merge(local.storage_common_tags, {
     class = "deprecated"
   })
 }
@@ -58,9 +101,47 @@ control "compute_disk_attached_stopped_instance" {
 control "compute_disk_large" {
   title         = "Disks with over 100 GB should be resized if too large"
   description   = "Large compute disks are unusual, expensive and should be reviewed."
-  sql           = query.compute_disk_large.sql
   severity      = "low"
+
+  sql = <<-EOT
+    select
+      self_link as resource,
+      case
+        when size_gb <= 100 then 'ok'
+        else 'alarm'
+      end as status,
+      title || ' is ' || size_gb || 'GB.' as reason,
+      project
+    from
+      gcp_compute_disk;
+  EOT
+
   tags = merge(local.compute_common_tags, {
+    class = "deprecated"
+  })
+}
+
+control "compute_long_running_instances" {
+  title         = "Long running compute instances should be reviewed"
+  description   = "Instances should ideally be ephemeral and rehydrated frequently, check why these instances have been running for so long."
+  severity      = "low"
+
+  sql = <<-EOT
+    select
+      self_link as resource,
+      case
+        when date_part('day', now() - creation_timestamp) > 90 then 'alarm'
+        else 'ok'
+      end as status,
+      title || ' has been running ' || date_part('day', now() - creation_timestamp) || ' days.' as reason,
+      project
+    from
+      gcp_compute_instance
+    where
+      status in ('PROVISIONING', 'STAGING', 'RUNNING','REPAIRING');
+  EOT
+
+  tags = merge(local.storage_common_tags, {
     class = "deprecated"
   })
 }
@@ -68,8 +149,21 @@ control "compute_disk_large" {
 control "compute_snapshot_age_90" {
   title         = "Snapshots created over 90 days ago should be deleted if not required"
   description   = "Old snapshots are likely unneeded and costly to maintain."
-  sql           = query.compute_snapshot_age_90.sql
   severity      = "low"
+
+  sql = <<-EOT
+    select
+      self_link as resource,
+      case
+        when creation_timestamp < (current_date - interval '90' day) then 'alarm'
+        else 'ok'
+      end as status,
+      name || ' created on ' || creation_timestamp || ' (' || date_part('day', now()-creation_timestamp) || ' days).' as reason,
+      project
+    from
+      gcp_compute_snapshot;
+  EOT
+
   tags = merge(local.compute_common_tags, {
     class = "deprecated"
   })
@@ -78,8 +172,24 @@ control "compute_snapshot_age_90" {
 control "compute_unattached_disk" {
   title         = "Unused compute disks should be removed"
   description   = "Unattached compute disks are charged by GCP, they should be removed unless there is a business need to retain them."
-  sql           = query.compute_unattached_disk.sql
   severity      = "low"
+
+  sql = <<-EOT
+    select
+      self_link as resource,
+      case
+        when users is null then 'alarm'
+        else 'ok'
+      end as status,
+      case
+        when users is null then title || ' has no attachments.'
+        else title || ' has attachments.'
+      end as reason,
+      project
+    from
+      gcp_compute_disk;
+  EOT
+
   tags = merge(local.storage_common_tags, {
     class = "deprecated"
   })
@@ -88,28 +198,24 @@ control "compute_unattached_disk" {
 control "compute_unattached_ip_address" {
   title         = "Unused external IP addresses should be removed"
   description   = "Unattached external IPs are charged, they should be released."
-  sql           = query.compute_unattached_ip_address.sql
   severity      = "low"
-  tags = merge(local.storage_common_tags, {
-    class = "deprecated"
-  })
-}
 
-control "compute_long_running_instances" {
-  title         = "Long running compute instances should be reviewed"
-  description   = "Instances should ideally be ephemeral and rehydrated frequently, check why these instances have been running for so long."
-  sql           = query.compute_long_running_instances.sql
-  severity      = "low"
-  tags = merge(local.storage_common_tags, {
-    class = "deprecated"
-  })
-}
+  sql = <<-EOT
+    select
+      self_link as resource,
+      case
+        when status != 'IN_USE' then 'alarm'
+        else 'ok'
+      end as status,
+      case
+        when status != 'IN_USE' then address || ' not attached.'
+        else address || ' attached.'
+      end as reason,
+      project
+    from
+      gcp_compute_address;
+  EOT
 
-control "compute_disk_extreme_persistent_disk" {
-  title         = "SSD persistent (pd-ssd) disks should be replaced with extreme persistent disks"
-  description   = "SSD persistent disk should use extreme persistent instead for higher performance."
-  sql           = query.compute_disk_extreme_persistent_disk.sql
-  severity      = "low"
   tags = merge(local.storage_common_tags, {
     class = "deprecated"
   })
