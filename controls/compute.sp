@@ -7,13 +7,14 @@ locals {
 benchmark "compute" {
   title         = "Compute Checks"
   description   = "Thrifty developers eliminate unused and under-utilized compute instances."
-  documentation = file("./controls/docs/compute.md") #TODO
+  documentation = file("./controls/docs/compute.md")
   tags          = local.compute_common_tags
   children = [
     control.compute_disk_attached_stopped_instance,
     control.compute_disk_balanced_persistent,
     control.compute_disk_extreme_persistent_disk,
     control.compute_disk_large,
+    control.compute_instance_large,
     control.compute_long_running_instances,
     control.compute_snapshot_age_90,
     control.compute_unattached_disk,
@@ -114,6 +115,30 @@ control "compute_disk_large" {
       project
     from
       gcp_compute_disk;
+  EOT
+
+  tags = merge(local.compute_common_tags, {
+    class = "deprecated"
+  })
+}
+
+control "compute_instance_large" {
+  title         = "Instances with more then 32 vCPU should be reviewed"
+  description   = "Large compute instances are unusual, expensive and should be reviewed."
+  severity      = "low"
+
+  sql = <<-EOT
+    select
+      self_link as resource,
+      case
+        when status not in ('RUNNING', 'PROVISIONING', 'STAGING', 'REPAIRING') then 'info'
+        when machine_type_name like any (ARRAY ['%-micro','%-small', '%-medium','%-2','%-4', '%-8','%-16','%-30','%-32','%-1g','%-2g']) then 'ok'
+        else 'alarm'
+      end as status,
+      title || ' has type ' || machine_type_name || ' and is ' || status || '.' as reason,
+      project
+    from
+      gcp_compute_instance;
   EOT
 
   tags = merge(local.compute_common_tags, {

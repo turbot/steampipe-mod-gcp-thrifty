@@ -9,7 +9,7 @@ locals {
 
 benchmark "thrifty_gcp" {
   title         = "GCP Thrifty <(ﾟ´(｡｡)`ﾟ)>"
-  description   = "Find unused, under-utilized and over-priced resources in your GCP account."
+  description   = "Find unused, under-utilized and over-priced resources in your GCP project."
   documentation = file("./controls/docs/thrifty.md")
   children = [
     benchmark.bigquery,
