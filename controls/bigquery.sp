@@ -6,7 +6,7 @@ locals {
 
 benchmark "bigquery" {
   title         = "BigQuery Checks"
-  description   = "Thrifty developers checks bigquery tables have stale data or not."
+  description   = "Thrifty developers delete BigQuery tables with stale data."
   documentation = file("./controls/docs/bigquery.md")
   tags          = local.bigquery_common_tags
   children = [
@@ -15,8 +15,8 @@ benchmark "bigquery" {
 }
 
 control "bigquery_stale_data" {
-  title       = "BigQuery table with stale data should be reviewed"
-  description = "If the data has not changed in 90 days, then table should be reviewed."
+  title       = "BigQuery tables with stale data should be reviewed"
+  description = "If the data has not changed in 90 days, the table should be reviewed."
   severity    = "low"
 
   sql = <<-EOT
