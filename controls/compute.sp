@@ -23,7 +23,7 @@ benchmark "compute" {
 }
 
 control "compute_disk_attached_stopped_instance" {
-  title         = "Disks attached to stopped instances should be reviewed"
+  title         = "Compute disks attached to stopped instances should be reviewed"
   description   = "Instances that are stopped may no longer need any disks attached."
   severity      = "low"
 
@@ -100,7 +100,7 @@ control "compute_disk_extreme_persistent_disk" {
 }
 
 control "compute_disk_large" {
-  title         = "Disks with over 100 GB should be resized if too large"
+  title         = "Compute disks with over 100 GB should be resized if too large"
   description   = "Large compute disks are unusual, expensive and should be reviewed."
   severity      = "low"
 
@@ -123,7 +123,7 @@ control "compute_disk_large" {
 }
 
 control "compute_instance_large" {
-  title         = "Instances with more then 32 vCPU should be reviewed"
+  title         = "Compute instances with more then 32 vCPU should be reviewed"
   description   = "Large compute instances are unusual, expensive and should be reviewed."
   severity      = "low"
 
@@ -147,7 +147,7 @@ control "compute_instance_large" {
 }
 
 control "compute_long_running_instances" {
-  title         = "Long running instances should be reviewed"
+  title         = "Long running Compute instances should be reviewed"
   description   = "Instances should ideally be ephemeral and rehydrated frequently, check why these instances have been running for so long."
   severity      = "low"
 
@@ -172,7 +172,7 @@ control "compute_long_running_instances" {
 }
 
 control "compute_snapshot_age_90" {
-  title         = "Snapshots created over 90 days ago should be deleted if not required"
+  title         = "Compute snapshots created over 90 days ago should be deleted if not required"
   description   = "Old snapshots are likely unneeded and costly to maintain."
   severity      = "low"
 
@@ -195,7 +195,7 @@ control "compute_snapshot_age_90" {
 }
 
 control "compute_disk_unattached" {
-  title         = "Unused disks should be removed"
+  title         = "Unused Compute disks should be removed"
   description   = "Unattached disks cost money and should be removed unless there is a business need to retain them."
   severity      = "low"
 
@@ -221,7 +221,7 @@ control "compute_disk_unattached" {
 }
 
 control "compute_address_unattached" {
-  title         = "Unused external IP addresses should be removed"
+  title         = "Unused Compute external IP addresses should be removed"
   description   = "Unattached external IPs cost money and should be released."
   severity      = "low"
 
