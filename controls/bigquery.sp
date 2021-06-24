@@ -15,7 +15,7 @@ benchmark "bigquery" {
 }
 
 control "bigquery_table_stale_data" {
-  title       = "BigQuery tables with stale data should be reviewed"
+  title       = "Tables with stale data should be reviewed"
   description = "If the data has not changed in 90 days, the table should be reviewed."
   severity    = "low"
 
