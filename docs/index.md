@@ -39,7 +39,7 @@ steampipe check all
 
 Run a specific control:
 ```shell
-steampipe check control.instances_with_low_utilization
+steampipe check control.compute_disk_unattached
 ```
 
 ### Credentials
