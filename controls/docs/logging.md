@@ -1,6 +1,6 @@
 ## Thrifty Logging Benchmark
 
-Thrifty developers actively manage the retention period of their Logging buckets. This benchmark focuses on finding logging buckets with retention period set to more than 30 days.
+Thrifty developers actively manage the retention period of their Logging buckets. This benchmark focuses on finding Logging buckets with retention period set to more than 30 days.
 
 ### Default Thresholds
 
