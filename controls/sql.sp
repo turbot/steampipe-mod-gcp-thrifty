@@ -17,7 +17,7 @@ benchmark "sql" {
 
 control "sql_db_instance_low_connection_count" {
   title         = "SQL DB instances with less than 2 connections per day should be reviewed"
-  description   = "DB instances having less usage in last 30 days should be reviewed if needed or not."
+  description   = "DB instances having less usage in last 30 days should be reviewed."
   severity      = "low"
 
   sql = <<-EOT
@@ -59,7 +59,7 @@ control "sql_db_instance_low_connection_count" {
 
 control "sql_db_instance_low_utilization" {
   title         = "SQL DB instance having less than 25% utilization should be reviewed"
-  description   = "These databases may be oversized for their usage."
+  description   = "DB instances may be oversized for their usage."
   severity      = "low"
 
   sql = <<-EOT

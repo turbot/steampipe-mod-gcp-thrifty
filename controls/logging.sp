@@ -15,8 +15,8 @@ benchmark "logging" {
 }
 
 control "logging_bucket_higher_retention_period" {
-  title         = "Buckets with retention period more than 30 days should be reviewed"
-  description   = "Setting a longer retention period for buckets should be reviewed as it impacts billing."
+  title         = "Logging buckets with retention period more than 30 days should be reviewed"
+  description   = "Setting a longer retention period should be reviewed as it impacts billing."
   severity      = "low"
 
   sql = <<-EOT
