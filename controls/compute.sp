@@ -113,25 +113,21 @@ control "compute_disk_low_usage" {
         count(max) as days
       from
         (
-          (
-            select
-              name,
-              cast(maximum as numeric) as max
-            from
-              gcp_compute_disk_metric_read_ops_daily
-            where
-              date_part('day', now() - timestamp) <= 30
-          )
-        union all
-          (
-            select
-              name,
-              cast(maximum as numeric) as max
-            from
-              gcp_compute_disk_metric_write_ops_daily
-            where
-              date_part('day', now() - timestamp) <= 30
-          )
+          select
+            name,
+            cast(maximum as numeric) as max
+          from
+            gcp_compute_disk_metric_read_ops_daily
+          where
+            date_part('day', now() - timestamp) <= 30
+          union all
+          select
+            name,
+            cast(maximum as numeric) as max
+          from
+            gcp_compute_disk_metric_write_ops_daily
+          where
+            date_part('day', now() - timestamp) <= 30
         ) as read_and_write_ops
       group by
         name
@@ -238,7 +234,7 @@ control "compute_instance_low_utilization" {
       select
         name,
         round(cast(sum(maximum) / count(maximum) as numeric), 1) as avg_max,
-        count(maximum) days
+        count(maximum) as days
       from
         gcp_compute_instance_metric_cpu_utilization_daily
       where
@@ -260,7 +256,7 @@ control "compute_instance_low_utilization" {
       end as reason,
       project
     from
-      gcp_compute_instance i
+      gcp_compute_instance as i
       left join compute_instance_utilization as u on u.name = i.name;
   EOT
 
