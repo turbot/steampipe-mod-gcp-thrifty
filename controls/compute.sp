@@ -252,7 +252,7 @@ control "compute_instance_low_utilization" {
       end as status,
       case
         when avg_max is null then 'Logging metrics not available for ' || title || '.'
-        else title || ' is averaging ' || avg_max || '% max utilization over the last ' || days || ' days.'
+        else title || ' averaging ' || avg_max || '% max utilization over the last ' || days || ' days.'
       end as reason,
       project
     from

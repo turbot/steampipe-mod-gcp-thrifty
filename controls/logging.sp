@@ -26,10 +26,8 @@ control "logging_bucket_higher_retention_period" {
         when retention_days > 30 then 'alarm'
         else 'ok'
       end as status,
-      case
-        when retention_days > 30 then name || ' is set to ' || retention_days || ' day(s) retention.'
-        else name || ' is set to ' || retention_days || ' day(s) retention.'
-      end as reason,
+      title || ' retention period set to ' || retention_days || ' day(s).'
+      as reason,
       project
     from
       gcp_logging_bucket

@@ -48,7 +48,7 @@ control "sql_db_instance_low_connection_count" {
       end as reason,
       project
     from
-      gcp_sql_database_instance i
+      gcp_sql_database_instance as i
       left join sql_db_instance_usage as u on i.project || ':' || i.name = u.instance_id;
   EOT
 
@@ -67,7 +67,7 @@ control "sql_db_instance_low_utilization" {
       select
         instance_id,
         round(cast(sum(maximum) / count(maximum) as numeric), 1) as avg_max,
-        count(maximum) days
+        count(maximum) as days
       from
         gcp_sql_database_instance_metric_cpu_utilization_daily
       where
@@ -89,7 +89,7 @@ control "sql_db_instance_low_utilization" {
       end as reason,
       i.project
     from
-      gcp_sql_database_instance i
+      gcp_sql_database_instance as i
       left join sql_db_instance_usage as u on i.project || ':' || i.name = u.instance_id
   EOT
 
