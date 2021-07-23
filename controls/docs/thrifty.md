@@ -4,4 +4,6 @@ The Thrifty GCP Benchmark provides prescriptive checks for discovery of unused, 
 
 * GCP BigQuery
 * GCP Compute
+* GCP Logging
+* GCP SQL
 * GCP Storage

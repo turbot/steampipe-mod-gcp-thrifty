@@ -13,9 +13,11 @@ benchmark "compute" {
     control.compute_address_unattached,
     control.compute_disk_attached_stopped_instance,
     control.compute_disk_large,
+    control.compute_disk_low_usage,
     control.compute_disk_unattached,
     control.compute_instance_large,
     control.compute_instance_long_running,
+    control.compute_instance_low_utilization,
     control.compute_snapshot_age_90,
   ]
 }
@@ -98,6 +100,55 @@ control "compute_disk_large" {
   })
 }
 
+control "compute_disk_low_usage" {
+  title         = "Compute disks with low usage should be reviewed"
+  description   = "Disks that are unused should be archived and deleted."
+  severity      = "low"
+
+  sql = <<-EOT
+    with disk_usage as (
+      select
+        name,
+        round(avg(max)) as avg_max,
+        count(max) as days
+      from
+        (
+          select
+            name,
+            cast(maximum as numeric) as max
+          from
+            gcp_compute_disk_metric_read_ops_daily
+          where
+            date_part('day', now() - timestamp) <= 30
+          union all
+          select
+            name,
+            cast(maximum as numeric) as max
+          from
+            gcp_compute_disk_metric_write_ops_daily
+          where
+            date_part('day', now() - timestamp) <= 30
+        ) as read_and_write_ops
+      group by
+        name
+    )
+    select
+      name as resource,
+      case
+        when avg_max <= 100 then 'alarm'
+        when avg_max <= 500 then 'info'
+        else 'ok'
+      end as status,
+      name || ' is averaging ' || avg_max || ' read and write ops over the last ' || days / 2 || ' days.' as reason
+    from
+      disk_usage;
+  EOT
+
+  tags = merge(local.compute_common_tags, {
+    class = "unused"
+  })
+}
+
 control "compute_disk_unattached" {
   title         = "Unused disks should be removed"
   description   = "Unattached disks cost money and should be removed unless there is a business need to retain them."
@@ -170,6 +221,47 @@ control "compute_instance_long_running" {
 
   tags = merge(local.storage_common_tags, {
     class = "deprecated"
+  })
+}
+
+control "compute_instance_low_utilization" {
+  title         = "Compute instances with low CPU utilization should be reviewed"
+  description   = "Resize or eliminate under utilized instances."
+  severity      = "low"
+
+  sql = <<-EOT
+    with compute_instance_utilization as (
+      select
+        name,
+        round(cast(sum(maximum) / count(maximum) as numeric), 1) as avg_max,
+        count(maximum) as days
+      from
+        gcp_compute_instance_metric_cpu_utilization_daily
+      where
+        date_part('day', now() - timestamp :: timestamp) <= 30
+      group by
+        name
+    )
+    select
+      self_link as resource,
+      case
+        when avg_max is null then 'error'
+        when avg_max < 20 then 'alarm'
+        when avg_max < 35 then 'info'
+        else 'ok'
+      end as status,
+      case
+        when avg_max is null then 'Logging metrics not available for ' || title || '.'
+        else title || ' averaging ' || avg_max || '% max utilization over the last ' || days || ' days.'
+      end as reason,
+      project
+    from
+      gcp_compute_instance as i
+      left join compute_instance_utilization as u on u.name = i.name;
+  EOT
+
+  tags = merge(local.compute_common_tags, {
+    class = "unused"
   })
 }
 
