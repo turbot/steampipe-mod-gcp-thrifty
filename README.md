@@ -21,7 +21,7 @@ steampipe plugin install gcp
 
 Clone this repo and move into the directory:
 ```sh
-git clone git@github.com:turbot/steampipe-mod-gcp-thrifty
+git clone https://github.com/turbot/steampipe-mod-gcp-thrifty.git
 cd steampipe-mod-gcp-thrifty
 ```
 
