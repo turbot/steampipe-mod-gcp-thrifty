@@ -2,7 +2,7 @@
 
 _Bug fixes_
 
-- Links to the Mod developer guide and the GitHub repo in the README.md file have been fixed
+- Broken links to the Mod developer guide and the GitHub repo in the README.md file have been fixed
 
 ## v0.2 [2021-07-23]
 
