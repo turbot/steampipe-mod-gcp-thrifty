@@ -1,3 +1,23 @@
+variable "compute_disk_threshold_size_in_gb" {
+  type        = number
+  description = "The threshold (in GB) configured for the disk size."
+}
+
+variable "compute_instance_allowed_types" {
+  type        = list(string)
+  description = "A list of allowed instance types to check for."
+}
+
+variable "compute_instance_running_allowed_days_threshold" {
+  type        = number
+  description = "The allowed number of days an instance can be in starting state."
+}
+
+variable "compute_snapshot_age_threshold_days" {
+  type        = number
+  description = "The threshold (i.e. number of days) configured for the snapshot age."
+}
+
 locals {
   compute_common_tags = merge(local.thrifty_common_tags, {
     service = "compute"
@@ -18,7 +38,7 @@ benchmark "compute" {
     control.compute_instance_large,
     control.compute_instance_long_running,
     control.compute_instance_low_utilization,
-    control.compute_snapshot_age_90,
+    control.compute_snapshot_max_age,
   ]
 }
 
@@ -78,7 +98,7 @@ control "compute_disk_attached_stopped_instance" {
 }
 
 control "compute_disk_large" {
-  title         = "Disks with over 100 GB should be resized if too large"
+  title         = "Disks with over ${var.compute_disk_threshold_size_in_gb} GB should be resized if too large"
   description   = "Large compute disks are unusual, expensive and should be reviewed."
   severity      = "low"
 
@@ -86,7 +106,7 @@ control "compute_disk_large" {
     select
       self_link as resource,
       case
-        when size_gb <= 100 then 'ok'
+        when size_gb <= $1 then 'ok'
         else 'info'
       end as status,
       title || ' has ' || size_gb || ' GB.' as reason,
@@ -94,6 +114,10 @@ control "compute_disk_large" {
     from
       gcp_compute_disk;
   EOT
+
+  param "compute_disk_threshold_size_in_gb" {
+    default = var.compute_disk_threshold_size_in_gb
+  }
 
   tags = merge(local.compute_common_tags, {
     class = "deprecated"
@@ -185,7 +209,7 @@ control "compute_instance_large" {
       self_link as resource,
       case
         when status not in ('RUNNING', 'PROVISIONING', 'STAGING', 'REPAIRING') then 'info'
-        when machine_type_name like any (ARRAY ['%-micro','%-small', '%-medium','%-2','%-4', '%-8','%-16','%-30','%-32','%-1g','%-2g']) then 'ok'
+        when machine_type_name like any ($1) then 'ok'
         else 'info'
       end as status,
       title || ' has type ' || machine_type_name || ' and is ' || status || '.' as reason,
@@ -193,6 +217,10 @@ control "compute_instance_large" {
     from
       gcp_compute_instance;
   EOT
+
+  param "compute_instance_allowed_types" {
+    default = var.compute_instance_allowed_types
+  }
 
   tags = merge(local.compute_common_tags, {
     class = "deprecated"
@@ -208,7 +236,7 @@ control "compute_instance_long_running" {
     select
       self_link as resource,
       case
-        when date_part('day', now() - creation_timestamp) > 90 then 'info'
+        when date_part('day', now() - creation_timestamp) > $1 then 'info'
         else 'ok'
       end as status,
       title || ' has been running for ' || date_part('day', now() - creation_timestamp) || ' day(s).' as reason,
@@ -218,6 +246,10 @@ control "compute_instance_long_running" {
     where
       status in ('PROVISIONING', 'STAGING', 'RUNNING','REPAIRING');
   EOT
+
+  param "compute_instance_running_allowed_days_threshold" {
+    default = var.compute_instance_running_allowed_days_threshold
+  }
 
   tags = merge(local.storage_common_tags, {
     class = "deprecated"
@@ -265,8 +297,8 @@ control "compute_instance_low_utilization" {
   })
 }
 
-control "compute_snapshot_age_90" {
-  title         = "Snapshots created over 90 days ago should be deleted if not required"
+control "compute_snapshot_max_age" {
+  title         = "Snapshots created over ${var.compute_snapshot_age_threshold_days} days ago should be deleted if not required"
   description   = "Old snapshots are likely unneeded and costly to maintain."
   severity      = "low"
 
@@ -274,7 +306,7 @@ control "compute_snapshot_age_90" {
     select
       self_link as resource,
       case
-        when creation_timestamp < (current_date - interval '90' day) then 'alarm'
+        when creation_timestamp < (current_date - interval '$1' day) then 'alarm'
         else 'ok'
       end as status,
       name || ' created on ' || creation_timestamp || ' (' || date_part('day', now()-creation_timestamp) || ' days).' as reason,
@@ -282,6 +314,10 @@ control "compute_snapshot_age_90" {
     from
       gcp_compute_snapshot;
   EOT
+
+  param "compute_snapshot_age_threshold_days" {
+    default = var.compute_snapshot_age_threshold_days
+  }
 
   tags = merge(local.compute_common_tags, {
     class = "unused"
