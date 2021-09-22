@@ -11,7 +11,7 @@ brew tap turbot/tap
 brew install steampipe
 
 steampipe -v
-steampipe version 0.7.0
+steampipe version 0.8.2
 ```
 
 Install the GCP plugin
