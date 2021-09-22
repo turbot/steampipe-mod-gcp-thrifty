@@ -1,11 +1,11 @@
 # BigQuery
-bigquery_stale_data_threshold_days = 90
+bigquery_table_stale_data_max_days = 90
 
 # Compute
-compute_disk_threshold_size_in_gb = 100
+compute_disk_max_size_gb = 100
 compute_instance_allowed_types = ["%-micro", "%-small", "%-medium", "%-2", "%-4", "%-8", "%-16", "%-30", "%-32", "%-1g", "%-2g"]
-compute_instance_running_allowed_days_threshold = 90
-compute_snapshot_age_threshold_days = 90
+compute_running_instance_age_max_days = 90
+compute_snapshot_age_max_days = 90
 
 # Logging
 logging_bucket_max_retention_days = 30

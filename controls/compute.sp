@@ -1,21 +1,21 @@
-variable "compute_disk_threshold_size_in_gb" {
+variable "compute_disk_max_size_gb" {
   type        = number
-  description = "The threshold (in GB) configured for the disk size."
+  description = "The maximum size in GB allowed for disks."
 }
 
 variable "compute_instance_allowed_types" {
   type        = list(string)
-  description = "A list of allowed instance types to check for."
+  description = "A list of allowed instance types. PostgreSQL wildcards are supported."
 }
 
-variable "compute_instance_running_allowed_days_threshold" {
+variable "compute_running_instance_age_max_days" {
   type        = number
-  description = "The allowed number of days an instance can be in starting state."
+  description = "The maximum number of days an instance can be running for."
 }
 
-variable "compute_snapshot_age_threshold_days" {
+variable "compute_snapshot_age_max_days" {
   type        = number
-  description = "The threshold (i.e. number of days) configured for the snapshot age."
+  description = "The maximum number of days a snapshot can be retained for."
 }
 
 locals {
@@ -98,7 +98,7 @@ control "compute_disk_attached_stopped_instance" {
 }
 
 control "compute_disk_large" {
-  title         = "Disks with over ${var.compute_disk_threshold_size_in_gb} GB should be resized if too large"
+  title         = "Disks with over ${var.compute_disk_max_size_gb} GB should be resized if too large"
   description   = "Large compute disks are unusual, expensive and should be reviewed."
   severity      = "low"
 
@@ -115,8 +115,8 @@ control "compute_disk_large" {
       gcp_compute_disk;
   EOT
 
-  param "compute_disk_threshold_size_in_gb" {
-    default = var.compute_disk_threshold_size_in_gb
+  param "compute_disk_max_size_gb" {
+    default = var.compute_disk_max_size_gb
   }
 
   tags = merge(local.compute_common_tags, {
@@ -247,8 +247,8 @@ control "compute_instance_long_running" {
       status in ('PROVISIONING', 'STAGING', 'RUNNING','REPAIRING');
   EOT
 
-  param "compute_instance_running_allowed_days_threshold" {
-    default = var.compute_instance_running_allowed_days_threshold
+  param "compute_running_instance_age_max_days" {
+    default = var.compute_running_instance_age_max_days
   }
 
   tags = merge(local.storage_common_tags, {
@@ -298,7 +298,7 @@ control "compute_instance_low_utilization" {
 }
 
 control "compute_snapshot_max_age" {
-  title         = "Snapshots created over ${var.compute_snapshot_age_threshold_days} days ago should be deleted if not required"
+  title         = "Snapshots created over ${var.compute_snapshot_age_max_days} days ago should be deleted if not required"
   description   = "Old snapshots are likely unneeded and costly to maintain."
   severity      = "low"
 
@@ -315,8 +315,8 @@ control "compute_snapshot_max_age" {
       gcp_compute_snapshot;
   EOT
 
-  param "compute_snapshot_age_threshold_days" {
-    default = var.compute_snapshot_age_threshold_days
+  param "compute_snapshot_age_max_days" {
+    default = var.compute_snapshot_age_max_days
   }
 
   tags = merge(local.compute_common_tags, {

@@ -6,7 +6,7 @@ locals {
 
 benchmark "storage" {
   title         = "Storage Checks"
-  description   = "Thrifty developers ensure their storage buckets have managed lifecycle."
+  description   = "Thrifty developers ensure their storage buckets have a managed lifecycle."
   documentation = file("./controls/docs/storage.md")
   tags          = local.storage_common_tags
   children = [

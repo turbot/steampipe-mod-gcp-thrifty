@@ -1,6 +1,6 @@
-variable "bigquery_stale_data_threshold_days" {
+variable "bigquery_table_stale_data_max_days" {
   type        = number
-  description = "The threshold (i.e. number of days) configured for the BigQuery table data to check for."
+  description = "The maximum number of days tables are allowed to have stale data for."
 }
 
 locals {
@@ -21,7 +21,7 @@ benchmark "bigquery" {
 
 control "bigquery_table_stale_data" {
   title       = "Tables with stale data should be reviewed"
-  description = "If the data has not changed in ${var.bigquery_stale_data_threshold_days} days, the table should be reviewed."
+  description = "If the data has not changed in ${var.bigquery_table_stale_data_max_days} days, the table should be reviewed."
   severity    = "low"
 
   sql = <<-EOT
@@ -38,8 +38,8 @@ control "bigquery_table_stale_data" {
       gcp_bigquery_table;
   EOT
 
-  param "bigquery_stale_data_threshold_days" {
-    default = var.bigquery_stale_data_threshold_days
+  param "bigquery_table_stale_data_max_days" {
+    default = var.bigquery_table_stale_data_max_days
   }
 
   tags = merge(local.bigquery_common_tags, {

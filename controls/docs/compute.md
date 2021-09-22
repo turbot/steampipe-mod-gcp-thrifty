@@ -5,10 +5,11 @@ This benchmark focuses on finding resources that have not been restarted
 recently, are using very large instance sizes, have old snapshots, have low utilization and have
 unused disks and IP addresses.
 
-### Default Thresholds
+### Variables
 
-- [Disks that are large (> 100 GB)](https://github.com/turbot/steampipe-mod-gcp-thrifty/blob/main/controls/compute.sp#L87)
-- [Instance types that are too big (> 32 vCPU)](https://github.com/turbot/steampipe-mod-gcp-thrifty/blob/main/controls/compute.sp#L137)
-- [Long running instance threshold (90 Days)](https://github.com/turbot/steampipe-mod-gcp-thrifty/blob/main/controls/compute.sp#L160)
-- [Snapshot age threshold (90 Days)](https://github.com/turbot/steampipe-mod-gcp-thrifty/blob/main/controls/compute.sp#L185)
-- [Very low utilization threshold (< 20%)](https://github.com/turbot/steampipe-mod-gcp-thrifty/blob/main/controls/compute.sp#L253)
+| Variable | Description | Default |
+| - | - | - |
+| compute_disk_max_size_gb | The maximum size in GB allowed for disks. | 100 GB |
+| compute_instance_allowed_types | A list of allowed instance types. PostgreSQL wildcards are supported. | ["%-micro", "%-small", "%-medium", "%-2", "%-4", "%-8", "%-16", "%-30", "%-32", "%-1g", "%-2g"] |
+| compute_running_instance_age_max_days | The maximum number of days an instance can be running for. | 90 days |
+| compute_snapshot_age_max_days | The maximum number of days a snapshot can be retained for. | 90 days |
