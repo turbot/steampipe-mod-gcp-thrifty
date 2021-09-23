@@ -10,7 +10,7 @@ The Thrifty GCP Benchmark provides prescriptive checks for discovery of unused, 
 
 ## Configuration
 
-Several controls have [input variables](https://steampipe.io/docs/using-steampipe/mod-variables) that can be configured to better match your environment and requirements. Each variable has a default defined in `steampipe.spvars`, but these can be overwritten in several ways:
+Several benchmarks have [input variables](https://steampipe.io/docs/using-steampipe/mod-variables) that can be configured to better match your environment and requirements. Each variable has a default defined in `steampipe.spvars`, but these can be overwritten in several ways:
 
 * Modify the `steampipe.spvars` file
 * Remove or comment out the value in `steampipe.spvars`, after which Steampipe will prompt you for a value when running a query or check
