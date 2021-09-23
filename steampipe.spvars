@@ -9,3 +9,7 @@ compute_snapshot_age_max_days = 90
 
 # Logging
 logging_bucket_max_retention_days = 30
+
+# SQL
+sql_db_instance_min_connections_per_day = 2
+sql_db_instance_min_cpu_utilization = 25

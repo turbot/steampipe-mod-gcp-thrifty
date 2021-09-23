@@ -1,6 +1,6 @@
 variable "logging_bucket_max_retention_days" {
   type        = number
-  description = "The maximum number of days a bucket's retention period can be set for."
+  description = "The maximum number of days a bucket's retention period can be set."
 }
 
 locals {

@@ -1,6 +1,6 @@
 variable "bigquery_table_stale_data_max_days" {
   type        = number
-  description = "The maximum number of days tables are allowed to have stale data for."
+  description = "The maximum number of days tables are allowed to have stale data."
 }
 
 locals {

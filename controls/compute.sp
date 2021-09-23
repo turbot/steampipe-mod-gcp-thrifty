@@ -10,12 +10,12 @@ variable "compute_instance_allowed_types" {
 
 variable "compute_running_instance_age_max_days" {
   type        = number
-  description = "The maximum number of days an instance can be running for."
+  description = "The maximum number of days an instance is allowed to run."
 }
 
 variable "compute_snapshot_age_max_days" {
   type        = number
-  description = "The maximum number of days a snapshot can be retained for."
+  description = "The maximum number of days a snapshot can be retained."
 }
 
 locals {

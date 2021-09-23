@@ -6,4 +6,4 @@ Thrifty developers actively manage the retention period of their Logging buckets
 
 | Variable | Description | Default |
 | - | - | - |
-| logging_bucket_max_retention_days | The maximum number of days a bucket's retention period can be set for. | 30 days |
+| logging_bucket_max_retention_days | The maximum number of days a bucket's retention period can be set. | 30 days |
