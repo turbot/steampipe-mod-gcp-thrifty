@@ -1,8 +1,8 @@
-## v0.3 [2021-09-22]
+## v0.3 [2021-09-23]
 
 _Bug fixes_
 
-- Broken links to the Mod developer guide and the GitHub repo in the README.md file have been fixed
+- Fixed broken links to the Mod developer guide and LICENSE in README.md
 
 ## v0.2 [2021-07-23]
 
