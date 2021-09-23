@@ -1,3 +1,9 @@
+## v0.3 [2021-09-23]
+
+_Bug fixes_
+
+- Fixed broken links to the Mod developer guide and LICENSE in README.md
+
 ## v0.2 [2021-07-23]
 
 _What's new?_
