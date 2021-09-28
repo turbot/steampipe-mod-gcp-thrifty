@@ -1,3 +1,8 @@
+variable "bigquery_table_stale_data_max_days" {
+  type        = number
+  description = "The maximum number of days table data can be unchanged before it is considered stale."
+}
+
 locals {
   bigquery_common_tags = merge(local.thrifty_common_tags, {
     service = "bigquery"
@@ -16,22 +21,27 @@ benchmark "bigquery" {
 
 control "bigquery_table_stale_data" {
   title       = "Tables with stale data should be reviewed"
-  description = "If the data has not changed in 90 days, the table should be reviewed."
+  description = "If the data has not changed recently and has become stale, the table should be reviewed."
   severity    = "low"
 
   sql = <<-EOT
     select
       self_link as resource,
       case
-        when date_part('day', now() -(last_modified_time :: timestamptz)) > 90 then 'info'
+        when date_part('day', now() - (last_modified_time :: timestamptz)) > $1 then 'info'
         else 'ok'
       end as status,
-      title || ' was changed ' || date_part('day', now() -(last_modified_time :: timestamptz)) || ' days ago.'
+      title || ' was changed ' || date_part('day', now() - (last_modified_time :: timestamptz)) || ' days ago.'
       as reason,
       project
     from
       gcp_bigquery_table;
   EOT
+
+  param "bigquery_table_stale_data_max_days" {
+    description = "The maximum number of days table data can be unchanged before it is considered stale."
+    default     = var.bigquery_table_stale_data_max_days
+  }
 
   tags = merge(local.bigquery_common_tags, {
     class = "deprecated"

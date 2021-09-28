@@ -1,3 +1,43 @@
+variable "compute_disk_max_size_gb" {
+  type        = number
+  description = "The maximum size (GB) allowed for disks."
+}
+
+variable "compute_disk_avg_read_write_ops_low" {
+  type        = number
+  description = "The number of average read/write ops required for disks to be considered infrequently used. This value should be lower than compute_disk_avg_read_write_ops_high."
+}
+
+variable "compute_disk_avg_read_write_ops_high" {
+  type        = number
+  description = "The number of average read/write ops required for disks to be considered frequently used. This value should be higher than compute_disk_avg_read_write_ops_low."
+}
+
+variable "compute_instance_allowed_types" {
+  type        = list(string)
+  description = "A list of allowed instance types. PostgreSQL wildcards are supported."
+}
+
+variable "compute_running_instance_age_max_days" {
+  type        = number
+  description = "The maximum number of days instances are allowed to run."
+}
+
+variable "compute_instance_avg_cpu_utilization_low" {
+  type        = number
+  description = "The average CPU utilization required for instances to be considered infrequently used. This value should be lower than compute_instance_avg_cpu_utilization_high."
+}
+
+variable "compute_instance_avg_cpu_utilization_high" {
+  type        = number
+  description = "The average CPU utilization required for instances to be considered frequently used. This value should be higher than compute_instance_avg_cpu_utilization_low."
+}
+
+variable "compute_snapshot_age_max_days" {
+  type        = number
+  description = "The maximum number of days snapshots can be retained."
+}
+
 locals {
   compute_common_tags = merge(local.thrifty_common_tags, {
     service = "compute"
@@ -18,7 +58,7 @@ benchmark "compute" {
     control.compute_instance_large,
     control.compute_instance_long_running,
     control.compute_instance_low_utilization,
-    control.compute_snapshot_age_90,
+    control.compute_snapshot_max_age,
   ]
 }
 
@@ -78,7 +118,7 @@ control "compute_disk_attached_stopped_instance" {
 }
 
 control "compute_disk_large" {
-  title         = "Disks with over 100 GB should be resized if too large"
+  title         = "Disks should be resized if too large"
   description   = "Large compute disks are unusual, expensive and should be reviewed."
   severity      = "low"
 
@@ -86,7 +126,7 @@ control "compute_disk_large" {
     select
       self_link as resource,
       case
-        when size_gb <= 100 then 'ok'
+        when size_gb <= $1 then 'ok'
         else 'info'
       end as status,
       title || ' has ' || size_gb || ' GB.' as reason,
@@ -94,6 +134,11 @@ control "compute_disk_large" {
     from
       gcp_compute_disk;
   EOT
+
+  param "compute_disk_max_size_gb" {
+    description = "The maximum size (GB) allowed for disks."
+    default     = var.compute_disk_max_size_gb
+  }
 
   tags = merge(local.compute_common_tags, {
     class = "deprecated"
@@ -135,14 +180,24 @@ control "compute_disk_low_usage" {
     select
       name as resource,
       case
-        when avg_max <= 100 then 'alarm'
-        when avg_max <= 500 then 'info'
+        when avg_max <= $1 then 'alarm'
+        when avg_max <= $2 then 'info'
         else 'ok'
       end as status,
       name || ' is averaging ' || avg_max || ' read and write ops over the last ' || days / 2 || ' days.' as reason
     from
       disk_usage;
   EOT
+
+  param "compute_disk_avg_read_write_ops_low" {
+    description = "The number of average read/write ops required for disks to be considered infrequently used. This value should be lower than compute_disk_avg_read_write_ops_high."
+    default     = var.compute_disk_avg_read_write_ops_low
+  }
+
+  param "compute_disk_avg_read_write_ops_high" {
+    description = "The number of average read/write ops required for disks to be considered frequently used. This value should be higher than compute_disk_avg_read_write_ops_low."
+    default     = var.compute_disk_avg_read_write_ops_high
+  }
 
   tags = merge(local.compute_common_tags, {
     class = "unused"
@@ -185,7 +240,7 @@ control "compute_instance_large" {
       self_link as resource,
       case
         when status not in ('RUNNING', 'PROVISIONING', 'STAGING', 'REPAIRING') then 'info'
-        when machine_type_name like any (ARRAY ['%-micro','%-small', '%-medium','%-2','%-4', '%-8','%-16','%-30','%-32','%-1g','%-2g']) then 'ok'
+        when machine_type_name like any ($1) then 'ok'
         else 'info'
       end as status,
       title || ' has type ' || machine_type_name || ' and is ' || status || '.' as reason,
@@ -193,6 +248,11 @@ control "compute_instance_large" {
     from
       gcp_compute_instance;
   EOT
+
+  param "compute_instance_allowed_types" {
+    description = "A list of allowed instance types. PostgreSQL wildcards are supported."
+    default     = var.compute_instance_allowed_types
+  }
 
   tags = merge(local.compute_common_tags, {
     class = "deprecated"
@@ -208,7 +268,7 @@ control "compute_instance_long_running" {
     select
       self_link as resource,
       case
-        when date_part('day', now() - creation_timestamp) > 90 then 'info'
+        when date_part('day', now() - creation_timestamp) > $1 then 'info'
         else 'ok'
       end as status,
       title || ' has been running for ' || date_part('day', now() - creation_timestamp) || ' day(s).' as reason,
@@ -218,6 +278,11 @@ control "compute_instance_long_running" {
     where
       status in ('PROVISIONING', 'STAGING', 'RUNNING','REPAIRING');
   EOT
+
+  param "compute_running_instance_age_max_days" {
+    description = "The maximum number of days instances are allowed to run."
+    default     = var.compute_running_instance_age_max_days
+  }
 
   tags = merge(local.storage_common_tags, {
     class = "deprecated"
@@ -246,8 +311,8 @@ control "compute_instance_low_utilization" {
       self_link as resource,
       case
         when avg_max is null then 'error'
-        when avg_max < 20 then 'alarm'
-        when avg_max < 35 then 'info'
+        when avg_max < $1 then 'alarm'
+        when avg_max < $2 then 'info'
         else 'ok'
       end as status,
       case
@@ -260,13 +325,23 @@ control "compute_instance_low_utilization" {
       left join compute_instance_utilization as u on u.name = i.name;
   EOT
 
+  param "compute_instance_avg_cpu_utilization_low" {
+    description = "The average CPU utilization required for instances to be considered infrequently used. This value should be lower than compute_instance_avg_cpu_utilization_high."
+    default     = var.compute_instance_avg_cpu_utilization_low
+  }
+
+  param "compute_instance_avg_cpu_utilization_high" {
+    description = "The average CPU utilization required for instances to be considered frequently used. This value should be higher than compute_instance_avg_cpu_utilization_low."
+    default     = var.compute_instance_avg_cpu_utilization_high
+  }
+
   tags = merge(local.compute_common_tags, {
     class = "unused"
   })
 }
 
-control "compute_snapshot_age_90" {
-  title         = "Snapshots created over 90 days ago should be deleted if not required"
+control "compute_snapshot_max_age" {
+  title         = "Old snapshots should be deleted if not required"
   description   = "Old snapshots are likely unneeded and costly to maintain."
   severity      = "low"
 
@@ -274,7 +349,7 @@ control "compute_snapshot_age_90" {
     select
       self_link as resource,
       case
-        when creation_timestamp < (current_date - interval '90' day) then 'alarm'
+        when creation_timestamp < (current_date - interval '$1' day) then 'alarm'
         else 'ok'
       end as status,
       name || ' created on ' || creation_timestamp || ' (' || date_part('day', now()-creation_timestamp) || ' days).' as reason,
@@ -282,6 +357,11 @@ control "compute_snapshot_age_90" {
     from
       gcp_compute_snapshot;
   EOT
+
+  param "compute_snapshot_age_max_days" {
+    description = "The maximum number of days snapshots can be retained."
+    default     = var.compute_snapshot_age_max_days
+  }
 
   tags = merge(local.compute_common_tags, {
     class = "unused"

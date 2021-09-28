@@ -1,3 +1,8 @@
+variable "logging_bucket_max_retention_days" {
+  type        = number
+  description = "The maximum number of days allowed for bucket log retention period."
+}
+
 locals {
   logging_common_tags = merge(local.thrifty_common_tags, {
     service = "logging"
@@ -15,7 +20,7 @@ benchmark "logging" {
 }
 
 control "logging_bucket_higher_retention_period" {
-  title         = "Logging buckets with retention period more than 30 days should be reviewed"
+  title         = "Logging buckets with long retention period should be reviewed"
   description   = "Setting a longer retention period should be reviewed as it impacts billing."
   severity      = "low"
 
@@ -23,7 +28,7 @@ control "logging_bucket_higher_retention_period" {
     select
       self_link as resource,
       case
-        when retention_days > 30 then 'alarm'
+        when retention_days > $1 then 'alarm'
         else 'ok'
       end as status,
       title || ' retention period set to ' || retention_days || ' day(s).' as reason,
@@ -33,6 +38,11 @@ control "logging_bucket_higher_retention_period" {
     where
       name != '_Required';
   EOT
+
+  param "logging_bucket_max_retention_days" {
+    description = "The maximum number of days allowed for bucket log retention period."
+    default     = var.logging_bucket_max_retention_days
+  }
 
   tags = merge(local.logging_common_tags, {
     class = "managed"
