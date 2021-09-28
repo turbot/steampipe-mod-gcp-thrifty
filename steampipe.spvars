@@ -1,0 +1,20 @@
+# BigQuery
+bigquery_table_stale_data_max_days = 90
+
+# Compute
+compute_disk_max_size_gb                  = 100
+compute_disk_avg_read_write_ops_low       = 100
+compute_disk_avg_read_write_ops_high      = 500
+compute_instance_allowed_types            = ["%-micro", "%-small", "%-medium", "%-2", "%-4", "%-8", "%-16", "%-30", "%-32", "%-1g", "%-2g"]
+compute_instance_avg_cpu_utilization_low  = 20
+compute_instance_avg_cpu_utilization_high = 35
+compute_running_instance_age_max_days     = 90
+compute_snapshot_age_max_days             = 90
+
+# Logging
+logging_bucket_max_retention_days = 30
+
+# SQL
+sql_db_instance_avg_connections          = 2
+sql_db_instance_avg_cpu_utilization_low  = 25
+sql_db_instance_avg_cpu_utilization_high = 25

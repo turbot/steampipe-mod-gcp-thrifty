@@ -1,3 +1,9 @@
+## v0.4 [2021-09-27]
+
+_What's new?_
+
+- Added: Input variables have been added to most controls to allow different thresholds to be passed in. To get started, please see [GCP Thrifty Configuration](https://hub.steampipe.io/mods/turbot/gcp_thrifty#configuration) and for a list of variables and their default values, please see [steampipe.spvars](https://github.com/turbot/steampipe-mod-gcp-thrifty/blob/main/steampipe.spvars).
+
 ## v0.3 [2021-09-23]
 
 _Bug fixes_

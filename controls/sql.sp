@@ -1,3 +1,18 @@
+variable "sql_db_instance_avg_connections" {
+  type        = number
+  description = "The minimum number of average connections per day required for DB instances to be considered in-use."
+}
+
+variable "sql_db_instance_avg_cpu_utilization_low" {
+  type        = number
+  description = "The average CPU utilization required for DB instances to be considered infrequently used. This value should be lower than sql_db_instance_avg_cpu_utilization_high."
+}
+
+variable "sql_db_instance_avg_cpu_utilization_high" {
+  type        = number
+  description = "The average CPU utilization required for DB instances to be considered frequently used. This value should be higher than sql_db_instance_avg_cpu_utilization_low."
+}
+
 locals {
   sql_common_tags = merge(local.thrifty_common_tags, {
     service = "sql"
@@ -16,7 +31,7 @@ benchmark "sql" {
 }
 
 control "sql_db_instance_low_connection_count" {
-  title         = "SQL DB instances with less than 2 connections per day should be reviewed"
+  title         = "SQL DB instances with a low number connections per day should be reviewed"
   description   = "DB instances having less usage in last 30 days should be reviewed."
   severity      = "low"
 
@@ -38,7 +53,7 @@ control "sql_db_instance_low_connection_count" {
       case
         when avg_max is null then 'error'
         when avg_max = 0 then 'alarm'
-        when avg_max < 2 then 'info'
+        when avg_max < $1 then 'info'
         else 'ok'
       end as status,
       case
@@ -52,13 +67,18 @@ control "sql_db_instance_low_connection_count" {
       left join sql_db_instance_usage as u on i.project || ':' || i.name = u.instance_id;
   EOT
 
+  param "sql_db_instance_avg_connections" {
+    description = "The minimum number of average connections per day required for DB instances to be considered in-use."
+    default     = var.sql_db_instance_avg_connections
+  }
+
   tags = merge(local.sql_common_tags, {
     class = "unused"
   })
 }
 
 control "sql_db_instance_low_utilization" {
-  title         = "SQL DB instance having less than 25% utilization should be reviewed"
+  title         = "SQL DB instance having low CPU utilization should be reviewed"
   description   = "DB instances may be oversized for their usage."
   severity      = "low"
 
@@ -79,8 +99,8 @@ control "sql_db_instance_low_utilization" {
       i.self_link as resource,
       case
         when avg_max is null then 'error'
-        when avg_max <= 25 then 'alarm'
-        when avg_max <= 50 then 'info'
+        when avg_max <= $1 then 'alarm'
+        when avg_max <= $2 then 'info'
         else 'ok'
       end as status,
       case
@@ -92,6 +112,16 @@ control "sql_db_instance_low_utilization" {
       gcp_sql_database_instance as i
       left join sql_db_instance_usage as u on i.project || ':' || i.name = u.instance_id
   EOT
+
+  param "sql_db_instance_avg_cpu_utilization_low" {
+    description = "The average CPU utilization required for DB instances to be considered infrequently used. This value should be lower than sql_db_instance_avg_cpu_utilization_high."
+    default     = var.sql_db_instance_avg_cpu_utilization_low
+  }
+
+  param "sql_db_instance_avg_cpu_utilization_high" {
+    description = "The average CPU utilization required for DB instances to be considered frequently used. This value should be higher than sql_db_instance_avg_cpu_utilization_low."
+    default     = var.sql_db_instance_avg_cpu_utilization_high
+  }
 
   tags = merge(local.sql_common_tags, {
     class = "managed"
