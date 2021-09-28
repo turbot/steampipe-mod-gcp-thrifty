@@ -6,5 +6,6 @@ Thrifty developers keep a careful eye for SQL DB instances with low connections 
 
 | Variable | Description | Default |
 | - | - | - |
-| sql_db_instance_min_connections_per_day | The minimum number of client sessions that are connected per day to the DB instance. | 2 connections/day |
-| sql_db_instance_min_cpu_utilization | The minimum percentage of computer processing capacity used for a DB instance. | 25% |
+| sql_db_instance_avg_connections | The minimum number of average connections per day required for DB instances to be considered in-use. | 2 connections/day |
+| sql_db_instance_avg_cpu_utilization_low | The average CPU utilization required for DB instances to be considered infrequently used. This value should be lower than the value for `sql_db_instance_avg_cpu_utilization_high`. | 25% |
+| sql_db_instance_avg_cpu_utilization_high | The average CPU utilization required for DB instances to be considered frequently used. This value should be higher than the value for `sql_db_instance_avg_cpu_utilization_low`. | 50% |

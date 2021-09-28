@@ -1,6 +1,16 @@
 variable "compute_disk_max_size_gb" {
   type        = number
-  description = "The maximum size in GB allowed for disks."
+  description = "The maximum size (GB) allowed for disks."
+}
+
+variable "compute_disk_avg_read_write_ops_low" {
+  type        = number
+  description = "The number of average read/write ops required for disks to be considered infrequently used. This value should be lower than compute_disk_avg_read_write_ops_high."
+}
+
+variable "compute_disk_avg_read_write_ops_high" {
+  type        = number
+  description = "The number of average read/write ops required for disks to be considered frequently used. This value should be higher than compute_disk_avg_read_write_ops_low."
 }
 
 variable "compute_instance_allowed_types" {
@@ -10,12 +20,22 @@ variable "compute_instance_allowed_types" {
 
 variable "compute_running_instance_age_max_days" {
   type        = number
-  description = "The maximum number of days an instance is allowed to run."
+  description = "The maximum number of days instances are allowed to run."
+}
+
+variable "compute_instance_avg_cpu_utilization_low" {
+  type        = number
+  description = "The average CPU utilization required for instances to be considered infrequently used. This value should be lower than compute_instance_avg_cpu_utilization_high."
+}
+
+variable "compute_instance_avg_cpu_utilization_high" {
+  type        = number
+  description = "The average CPU utilization required for instances to be considered frequently used. This value should be higher than compute_instance_avg_cpu_utilization_low."
 }
 
 variable "compute_snapshot_age_max_days" {
   type        = number
-  description = "The maximum number of days a snapshot can be retained."
+  description = "The maximum number of days snapshots can be retained."
 }
 
 locals {
@@ -98,7 +118,7 @@ control "compute_disk_attached_stopped_instance" {
 }
 
 control "compute_disk_large" {
-  title         = "Disks with over ${var.compute_disk_max_size_gb} GB should be resized if too large"
+  title         = "Disks should be resized if too large"
   description   = "Large compute disks are unusual, expensive and should be reviewed."
   severity      = "low"
 
@@ -116,7 +136,8 @@ control "compute_disk_large" {
   EOT
 
   param "compute_disk_max_size_gb" {
-    default = var.compute_disk_max_size_gb
+    description = "The maximum size (GB) allowed for disks."
+    default     = var.compute_disk_max_size_gb
   }
 
   tags = merge(local.compute_common_tags, {
@@ -159,14 +180,24 @@ control "compute_disk_low_usage" {
     select
       name as resource,
       case
-        when avg_max <= 100 then 'alarm'
-        when avg_max <= 500 then 'info'
+        when avg_max <= $1 then 'alarm'
+        when avg_max <= $2 then 'info'
         else 'ok'
       end as status,
       name || ' is averaging ' || avg_max || ' read and write ops over the last ' || days / 2 || ' days.' as reason
     from
       disk_usage;
   EOT
+
+  param "compute_disk_avg_read_write_ops_low" {
+    description = "The number of average read/write ops required for disks to be considered infrequently used. This value should be lower than compute_disk_avg_read_write_ops_high."
+    default     = var.compute_disk_avg_read_write_ops_low
+  }
+
+  param "compute_disk_avg_read_write_ops_high" {
+    description = "The number of average read/write ops required for disks to be considered frequently used. This value should be higher than compute_disk_avg_read_write_ops_low."
+    default     = var.compute_disk_avg_read_write_ops_high
+  }
 
   tags = merge(local.compute_common_tags, {
     class = "unused"
@@ -219,7 +250,8 @@ control "compute_instance_large" {
   EOT
 
   param "compute_instance_allowed_types" {
-    default = var.compute_instance_allowed_types
+    description = "A list of allowed instance types. PostgreSQL wildcards are supported."
+    default     = var.compute_instance_allowed_types
   }
 
   tags = merge(local.compute_common_tags, {
@@ -248,7 +280,8 @@ control "compute_instance_long_running" {
   EOT
 
   param "compute_running_instance_age_max_days" {
-    default = var.compute_running_instance_age_max_days
+    description = "The maximum number of days instances are allowed to run."
+    default     = var.compute_running_instance_age_max_days
   }
 
   tags = merge(local.storage_common_tags, {
@@ -278,8 +311,8 @@ control "compute_instance_low_utilization" {
       self_link as resource,
       case
         when avg_max is null then 'error'
-        when avg_max < 20 then 'alarm'
-        when avg_max < 35 then 'info'
+        when avg_max < $1 then 'alarm'
+        when avg_max < $2 then 'info'
         else 'ok'
       end as status,
       case
@@ -292,13 +325,23 @@ control "compute_instance_low_utilization" {
       left join compute_instance_utilization as u on u.name = i.name;
   EOT
 
+  param "compute_instance_avg_cpu_utilization_low" {
+    description = "The average CPU utilization required for instances to be considered infrequently used. This value should be lower than compute_instance_avg_cpu_utilization_high."
+    default     = var.compute_instance_avg_cpu_utilization_low
+  }
+
+  param "compute_instance_avg_cpu_utilization_high" {
+    description = "The average CPU utilization required for instances to be considered frequently used. This value should be higher than compute_instance_avg_cpu_utilization_low."
+    default     = var.compute_instance_avg_cpu_utilization_high
+  }
+
   tags = merge(local.compute_common_tags, {
     class = "unused"
   })
 }
 
 control "compute_snapshot_max_age" {
-  title         = "Snapshots created over ${var.compute_snapshot_age_max_days} days ago should be deleted if not required"
+  title         = "Old snapshots should be deleted if not required"
   description   = "Old snapshots are likely unneeded and costly to maintain."
   severity      = "low"
 
@@ -316,7 +359,8 @@ control "compute_snapshot_max_age" {
   EOT
 
   param "compute_snapshot_age_max_days" {
-    default = var.compute_snapshot_age_max_days
+    description = "The maximum number of days snapshots can be retained."
+    default     = var.compute_snapshot_age_max_days
   }
 
   tags = merge(local.compute_common_tags, {
