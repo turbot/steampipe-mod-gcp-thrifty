@@ -17,4 +17,4 @@ logging_bucket_max_retention_days = 30
 # SQL
 sql_db_instance_avg_connections          = 2
 sql_db_instance_avg_cpu_utilization_low  = 25
-sql_db_instance_avg_cpu_utilization_high = 25
+sql_db_instance_avg_cpu_utilization_high = 50
