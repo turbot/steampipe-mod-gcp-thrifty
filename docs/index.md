@@ -6,6 +6,8 @@ repository: "https://github.com/turbot/steampipe-mod-gcp-thrifty"
 
 Be Thrifty on GCP! This mod checks for unused resources and opportunities to optimize your spend on GCP.
 
+![image](https://github.com/turbot/steampipe-mod-gcp-thrifty/blob/main/docs/gcp-thrifty-console-graphic.png)
+
 ## References
 
 [GCP](https://cloud.google.com) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis. 
