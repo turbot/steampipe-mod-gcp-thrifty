@@ -2,7 +2,7 @@
 
 _Enhancements_
 
-- docs/index.md file now includes the console output image
+- `docs/index.md` file now includes the console output image
 
 _Bug fixes_
 
