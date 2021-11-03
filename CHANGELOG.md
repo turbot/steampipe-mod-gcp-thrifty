@@ -6,7 +6,7 @@ _Enhancements_
 
 _Bug fixes_
 
-- Fixed the `sql_db_instance_avg_cpu_utilization_high` variable to use `50%` instead of `25%`
+- Fixed the `sql_db_instance_avg_cpu_utilization_high` variable to use `50%` instead of `25%` ([18](https://github.com/turbot/steampipe-mod-gcp-thrifty/pull/18))
 
 ## v0.4 [2021-09-27]
 
