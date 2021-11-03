@@ -1,3 +1,9 @@
+## v0.6 [2021-11-03]
+
+_Bug fixes_
+
+- Fixed the broken link for the console output image in the `docs/index.md` file
+
 ## v0.5 [2021-11-03]
 
 _Enhancements_
