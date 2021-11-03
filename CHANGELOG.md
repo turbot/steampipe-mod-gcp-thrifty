@@ -1,3 +1,13 @@
+## v0.5 [2021-11-03]
+
+_Enhancements_
+
+- `docs/index.md` file now includes the console output image
+
+_Bug fixes_
+
+- Fixed the `sql_db_instance_avg_cpu_utilization_high` variable to use `50%` instead of `25%` ([18](https://github.com/turbot/steampipe-mod-gcp-thrifty/pull/18))
+
 ## v0.4 [2021-09-27]
 
 _What's new?_
