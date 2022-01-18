@@ -1,6 +1,6 @@
 # GCP Thrifty
 
-An GCP cost savings and waste checking tool.
+A GCP cost savings and waste checking tool.
 
 ## Quick start
 
@@ -54,7 +54,7 @@ steampipe query "select resource_name from steampipe_control;"
 ## Contributing
 
 Have an idea for a thrifty check but aren't sure how to get started?
-- **[Join our Slack community →](https://join.slack.com/t/steampipe/shared_invite/zt-oij778tv-lYyRTWOTMQYBVAbtPSWs3g)**
+- **[Join our Slack community →](https://steampipe.io/community/join)**
 - **[Mod developer guide →](https://steampipe.io/docs/using-steampipe/writing-controls)**
 
 **Prerequisites**:
@@ -70,11 +70,11 @@ Click on the GitHub Fork Widget. (Don't forget to :star: the repo!)
 2. Type the clone command below inserting your GitHub username instead of `YOUR-USERNAME`:
 
 ```sh
-git clone git@github.com:YOUR-USERNAME/steampipe-mod-gcp-thrifty
+git clone https://github.com/turbot/steampipe-mod-gcp-thrifty.git
 cd steampipe-mod-gcp-thrifty
 ```
 
-Thanks for getting involved! We would love to have you [join our Slack community](https://join.slack.com/t/steampipe/shared_invite/zt-oij778tv-lYyRTWOTMQYBVAbtPSWs3g) and hang out with other Mod developers.
+Thanks for getting involved! We would love to have you [join our Slack community](https://steampipe.io/community/join) and hang out with other Mod developers.
 
 Please see the [contribution guidelines](https://github.com/turbot/steampipe/blob/main/CONTRIBUTING.md) and our [code of conduct](https://github.com/turbot/steampipe/blob/main/CODE_OF_CONDUCT.md). All contributions are subject to the [Apache 2.0 open source license](https://github.com/turbot/steampipe-mod-gcp-thrifty/blob/main/LICENSE).
 
