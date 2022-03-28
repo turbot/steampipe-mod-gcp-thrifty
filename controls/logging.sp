@@ -1,6 +1,7 @@
 variable "logging_bucket_max_retention_days" {
   type        = number
   description = "The maximum number of days allowed for bucket log retention period."
+  default     = 30
 }
 
 locals {

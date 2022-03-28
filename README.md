@@ -37,6 +37,31 @@ Your can also run a specific controls:
 steampipe check control.compute_disk_unattached
 ```
 
+### Credentials
+
+This mod uses the credentials configured in the [Steampipe GCP plugin](https://hub.steampipe.io/plugins/turbot/gcp).
+
+### Configuration
+
+Several benchmarks have [input variables](https://steampipe.io/docs/using-steampipe/mod-variables) that can be configured to better match your environment and requirements. Each variable has a default defined in its source file, e.g., `controls/sql.sp`, but these can be overwritten in several ways:
+
+- Copy and rename the `steampipe.spvars.example` file to `steampipe.spvars`, and then modify the variable values inside that file
+- Pass in a value on the command line:
+
+  ```shell
+  steampipe check benchmark.bigquery --var=bigquery_table_stale_data_max_days=90
+  ```
+
+- Set an environment variable:
+
+  ```shell
+  SP_VAR_bigquery_table_stale_data_max_days=90 steampipe check control.bigquery_table_stale_data
+  ```
+
+  - Note: When using environment variables, if the variable is defined in `steampipe.spvars` or passed in through the command line, either of those will take precedence over the environment variable value. For more information on variable definition precedence, please see the link below.
+
+These are only some of the ways you can set variables. For a full list, please see [Passing Input Variables](https://steampipe.io/docs/using-steampipe/mod-variables#passing-input-variables).
+
 ## Current Thrifty Checks
 
 - Unused, underused and oversized **Compute Instances**
