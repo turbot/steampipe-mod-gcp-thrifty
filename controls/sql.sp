@@ -1,16 +1,19 @@
 variable "sql_db_instance_avg_connections" {
   type        = number
   description = "The minimum number of average connections per day required for DB instances to be considered in-use."
+  default     = 2
 }
 
 variable "sql_db_instance_avg_cpu_utilization_low" {
   type        = number
   description = "The average CPU utilization required for DB instances to be considered infrequently used. This value should be lower than sql_db_instance_avg_cpu_utilization_high."
+  default     = 25
 }
 
 variable "sql_db_instance_avg_cpu_utilization_high" {
   type        = number
   description = "The average CPU utilization required for DB instances to be considered frequently used. This value should be higher than sql_db_instance_avg_cpu_utilization_low."
+  default     = 50
 }
 
 locals {
