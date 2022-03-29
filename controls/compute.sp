@@ -1,41 +1,49 @@
 variable "compute_disk_max_size_gb" {
   type        = number
   description = "The maximum size (GB) allowed for disks."
+  default     = 100
 }
 
 variable "compute_disk_avg_read_write_ops_low" {
   type        = number
   description = "The number of average read/write ops required for disks to be considered infrequently used. This value should be lower than compute_disk_avg_read_write_ops_high."
+  default     = 100
 }
 
 variable "compute_disk_avg_read_write_ops_high" {
   type        = number
   description = "The number of average read/write ops required for disks to be considered frequently used. This value should be higher than compute_disk_avg_read_write_ops_low."
+  default     = 500
 }
 
 variable "compute_instance_allowed_types" {
   type        = list(string)
   description = "A list of allowed instance types. PostgreSQL wildcards are supported."
+  default     = ["%-micro", "%-small", "%-medium", "%-2", "%-4", "%-8", "%-16", "%-30", "%-32", "%-1g", "%-2g"]
 }
 
 variable "compute_running_instance_age_max_days" {
   type        = number
   description = "The maximum number of days instances are allowed to run."
+  default     = 90
 }
 
 variable "compute_instance_avg_cpu_utilization_low" {
   type        = number
   description = "The average CPU utilization required for instances to be considered infrequently used. This value should be lower than compute_instance_avg_cpu_utilization_high."
+  default     = 20
 }
 
 variable "compute_instance_avg_cpu_utilization_high" {
   type        = number
   description = "The average CPU utilization required for instances to be considered frequently used. This value should be higher than compute_instance_avg_cpu_utilization_low."
+  default     = 35
 }
 
 variable "compute_snapshot_age_max_days" {
   type        = number
   description = "The maximum number of days snapshots can be retained."
+  default     = 90
 }
 
 locals {
