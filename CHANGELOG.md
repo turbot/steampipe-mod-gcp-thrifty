@@ -1,3 +1,9 @@
+## v0.8 [2022-04-06]
+
+_Bug fixes_
+
+- Fixed the inline query of `compute_snapshot_max_age` control to correctly review the age of snapshots ([#28](https://github.com/turbot/steampipe-mod-gcp-thrifty/pull/28))
+
 ## v0.7 [2022-03-29]
 
 _What's new?_

@@ -357,7 +357,7 @@ control "compute_snapshot_max_age" {
     select
       self_link as resource,
       case
-        when creation_timestamp < (current_date - interval '$1' day) then 'alarm'
+        when creation_timestamp < (current_date - ($1 || ' days')::interval) then 'alarm'
         else 'ok'
       end as status,
       name || ' created on ' || creation_timestamp || ' (' || date_part('day', now()-creation_timestamp) || ' days).' as reason,
