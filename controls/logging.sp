@@ -5,8 +5,8 @@ variable "logging_bucket_max_retention_days" {
 }
 
 locals {
-  logging_common_tags = merge(local.thrifty_common_tags, {
-    service = "logging"
+  logging_common_tags = merge(local.gcp_thrifty_common_tags, {
+    service = "GCP/Logging"
   })
 }
 
@@ -14,10 +14,13 @@ benchmark "logging" {
   title         = "Logging Checks"
   description   = "Thrifty developers checks Logging buckets having retention period more than 30 days."
   documentation = file("./controls/docs/logging.md")
-  tags          = local.logging_common_tags
   children = [
-    control.logging_bucket_higher_retention_period,
+    control.logging_bucket_higher_retention_period
   ]
+
+  tags = merge(local.logging_common_tags, {
+    type = "Benchmark"
+  })
 }
 
 control "logging_bucket_higher_retention_period" {

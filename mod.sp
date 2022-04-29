@@ -1,3 +1,12 @@
+// Benchmarks and controls for specific services should override the "service" tag
+locals {
+  gcp_thrifty_common_tags = {
+    category = "Cost"
+    plugin   = "gcp"
+    service  = "GCP"
+  }
+}
+
 mod "gcp_thrifty" {
   # hub metadata
   title         = "GCP Thrifty"
