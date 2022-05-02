@@ -5,8 +5,8 @@ variable "bigquery_table_stale_data_max_days" {
 }
 
 locals {
-  bigquery_common_tags = merge(local.thrifty_common_tags, {
-    service = "bigquery"
+  bigquery_common_tags = merge(local.gcp_thrifty_common_tags, {
+    service = "GCP/BigQuery"
   })
 }
 
@@ -14,10 +14,13 @@ benchmark "bigquery" {
   title         = "BigQuery Checks"
   description   = "Thrifty developers delete BigQuery tables with stale data."
   documentation = file("./controls/docs/bigquery.md")
-  tags          = local.bigquery_common_tags
   children = [
-    control.bigquery_table_stale_data,
+    control.bigquery_table_stale_data
   ]
+
+  tags = merge(local.bigquery_common_tags, {
+    type = "Benchmark"
+  })
 }
 
 control "bigquery_table_stale_data" {

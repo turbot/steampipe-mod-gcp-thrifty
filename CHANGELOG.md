@@ -1,3 +1,9 @@
+## v0.9 [2022-05-02]
+
+_Enhancements_
+
+- Added `category`, `service`, and `type` tags to benchmarks and controls. ([#32](https://github.com/turbot/steampipe-mod-gcp-thrifty/pull/32))
+
 ## v0.8 [2022-04-06]
 
 _Bug fixes_

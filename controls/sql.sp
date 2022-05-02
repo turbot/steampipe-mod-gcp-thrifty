@@ -17,8 +17,8 @@ variable "sql_db_instance_avg_cpu_utilization_high" {
 }
 
 locals {
-  sql_common_tags = merge(local.thrifty_common_tags, {
-    service = "sql"
+  sql_common_tags = merge(local.gcp_thrifty_common_tags, {
+    service = "GCP/SQL"
   })
 }
 
@@ -26,11 +26,14 @@ benchmark "sql" {
   title         = "SQL Checks"
   description   = "Thrifty developers eliminate unused and under-utilized SQL DB instances."
   documentation = file("./controls/docs/sql.md")
-  tags          = local.sql_common_tags
   children = [
     control.sql_db_instance_low_connection_count,
-    control.sql_db_instance_low_utilization,
+    control.sql_db_instance_low_utilization
   ]
+
+  tags = merge(local.sql_common_tags, {
+    type = "Benchmark"
+  })
 }
 
 control "sql_db_instance_low_connection_count" {

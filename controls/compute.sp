@@ -47,8 +47,8 @@ variable "compute_snapshot_age_max_days" {
 }
 
 locals {
-  compute_common_tags = merge(local.thrifty_common_tags, {
-    service = "compute"
+  compute_common_tags = merge(local.gcp_thrifty_common_tags, {
+    service = "GCP/Compute"
   })
 }
 
@@ -56,7 +56,6 @@ benchmark "compute" {
   title         = "Compute Checks"
   description   = "Thrifty developers eliminate unused and under-utilized Compute resources."
   documentation = file("./controls/docs/compute.md")
-  tags          = local.compute_common_tags
   children = [
     control.compute_address_unattached,
     control.compute_disk_attached_stopped_instance,
@@ -66,8 +65,12 @@ benchmark "compute" {
     control.compute_instance_large,
     control.compute_instance_long_running,
     control.compute_instance_low_utilization,
-    control.compute_snapshot_max_age,
+    control.compute_snapshot_max_age
   ]
+
+  tags = merge(local.compute_common_tags, {
+    type = "Benchmark"
+  })
 }
 
 control "compute_address_unattached" {
