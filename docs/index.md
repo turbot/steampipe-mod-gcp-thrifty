@@ -6,8 +6,8 @@ repository: "https://github.com/turbot/steampipe-mod-gcp-thrifty"
 
 Be Thrifty on GCP! This mod checks for unused resources and opportunities to optimize your spend on GCP.
 
-<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-gcp-thrifty/upadte-doc-fix/docs/gcp_thrifty_dashboard.png" width="50%" type="thumbnail"/>
-<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-gcp-thrifty/upadte-doc-fix/docs/gcp_thrifty_compute_dashboard.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-gcp-thrifty/main/docs/gcp_thrifty_dashboard.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/steampipe-mod-gcp-thrifty/main/docs/gcp_thrifty_compute_dashboard.png" width="50%" type="thumbnail"/>
 <img src="https://raw.githubusercontent.com/turbot/steampipe-mod-gcp-thrifty/main/docs/gcp_thrifty_console_graphic.png" width="50%" type="thumbnail"/>
 
 ## References
