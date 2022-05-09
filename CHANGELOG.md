@@ -1,3 +1,9 @@
+## v0.10 [2022-05-09]
+
+_Enhancements_
+
+- Updated docs/index.md and README with new dashboard screenshots and latest format. ([#36](https://github.com/turbot/steampipe-mod-gcp-thrifty/pull/36))
+
 ## v0.9 [2022-05-02]
 
 _Enhancements_
