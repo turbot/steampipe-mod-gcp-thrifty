@@ -94,13 +94,13 @@ Several benchmarks have [input variables](https://steampipe.io/docs/using-steamp
 - Copy and rename the `steampipe.spvars.example` file to `steampipe.spvars`, and then modify the variable values inside that file
 - Pass in a value on the command line:
 
-  ```shell
+  ```sh
   steampipe check benchmark.bigquery --var=bigquery_table_stale_data_max_days=90
   ```
 
 - Set an environment variable:
 
-  ```shell
+  ```sh
   SP_VAR_bigquery_table_stale_data_max_days=90 steampipe check control.bigquery_table_stale_data
   ```
 
