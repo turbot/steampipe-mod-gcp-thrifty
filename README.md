@@ -1,4 +1,4 @@
-# GCP Thrifty
+# GCP Thrifty Mod for Steampipe
 
 A GCP cost savings and waste checking tool.
 
