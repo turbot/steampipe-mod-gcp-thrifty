@@ -88,8 +88,8 @@ control "compute_address_unattached" {
       case
         when status != 'IN_USE' then address || ' not attached.'
         else address || ' attached.'
-      end as reason,
-      project
+      end as reason
+      ${local.common_dimensions_sql}
     from
       gcp_compute_address;
   EOT
@@ -116,8 +116,8 @@ control "compute_disk_attached_stopped_instance" {
         when d.users is null then d.name || ' not attached to instance.'
         when i.status = 'RUNNING' then d.name || ' attached to running instance.'
         else d.name || ' not attached to running instance.'
-      end as reason,
-      d.project
+      end as reason
+      ${replace(local.common_dimensions_qualifier_sql, "__QUALIFIER__", "d.")}
     from
       gcp_compute_disk as d
       left join gcp_compute_instance as i on d.users ?& ARRAY [i.self_link];
@@ -140,8 +140,9 @@ control "compute_disk_large" {
         when size_gb <= $1 then 'ok'
         else 'info'
       end as status,
-      title || ' has ' || size_gb || ' GB.' as reason,
-      project
+      title || ' has ' || size_gb || ' GB.' as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_compute_disk;
   EOT
@@ -164,13 +165,19 @@ control "compute_disk_low_usage" {
   sql = <<-EOT
     with disk_usage as (
       select
+        project,
+        location,
         name,
+        _ctx,
         round(avg(max)) as avg_max,
         count(max) as days
       from
         (
           select
+            project,
             name,
+            location,
+            _ctx,
             cast(maximum as numeric) as max
           from
             gcp_compute_disk_metric_read_ops_daily
@@ -178,7 +185,10 @@ control "compute_disk_low_usage" {
             date_part('day', now() - timestamp) <= 30
           union all
           select
+            project,
             name,
+            location,
+            _ctx,
             cast(maximum as numeric) as max
           from
             gcp_compute_disk_metric_write_ops_daily
@@ -186,7 +196,10 @@ control "compute_disk_low_usage" {
             date_part('day', now() - timestamp) <= 30
         ) as read_and_write_ops
       group by
-        name
+        name,
+        project,
+        _ctx,
+        location
     )
     select
       name as resource,
@@ -196,6 +209,7 @@ control "compute_disk_low_usage" {
         else 'ok'
       end as status,
       name || ' is averaging ' || avg_max || ' read and write ops over the last ' || days / 2 || ' days.' as reason
+      ${local.common_dimensions_sql}
     from
       disk_usage;
   EOT
@@ -230,8 +244,9 @@ control "compute_disk_unattached" {
       case
         when users is null then title || ' has no attachments.'
         else title || ' has attachments.'
-      end as reason,
-      project
+      end as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_compute_disk;
   EOT
@@ -254,8 +269,9 @@ control "compute_instance_large" {
         when machine_type_name like any ($1) then 'ok'
         else 'info'
       end as status,
-      title || ' has type ' || machine_type_name || ' and is ' || status || '.' as reason,
-      project
+      title || ' has type ' || machine_type_name || ' and is ' || status || '.' as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_compute_instance;
   EOT
@@ -282,8 +298,9 @@ control "compute_instance_long_running" {
         when date_part('day', now() - creation_timestamp) > $1 then 'info'
         else 'ok'
       end as status,
-      title || ' has been running for ' || date_part('day', now() - creation_timestamp) || ' day(s).' as reason,
-      project
+      title || ' has been running for ' || date_part('day', now() - creation_timestamp) || ' day(s).' as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_compute_instance
     where
@@ -329,8 +346,9 @@ control "compute_instance_low_utilization" {
       case
         when avg_max is null then 'Logging metrics not available for ' || title || '.'
         else title || ' averaging ' || avg_max || '% max utilization over the last ' || days || ' days.'
-      end as reason,
-      project
+      end as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_compute_instance as i
       left join compute_instance_utilization as u on u.name = i.name;
@@ -360,11 +378,12 @@ control "compute_snapshot_max_age" {
     select
       self_link as resource,
       case
-        when creation_timestamp < (current_date - ($1 || ' days')::interval) then 'alarm'
+        when date_part('day', now()-creation_timestamp) > $1 then 'alarm'
         else 'ok'
       end as status,
-      name || ' created on ' || creation_timestamp || ' (' || date_part('day', now()-creation_timestamp) || ' days).' as reason,
-      project
+      name || ' created on ' || creation_timestamp || ' (' || date_part('day', now()-creation_timestamp) || ' days).' as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_compute_snapshot;
   EOT

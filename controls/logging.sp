@@ -35,8 +35,8 @@ control "logging_bucket_higher_retention_period" {
         when retention_days > $1 then 'alarm'
         else 'ok'
       end as status,
-      title || ' retention period set to ' || retention_days || ' day(s).' as reason,
-      project
+      title || ' retention period set to ' || retention_days || ' day(s).' as reason
+      ${local.common_dimensions_sql}
     from
       gcp_logging_bucket
     where

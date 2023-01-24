@@ -36,8 +36,9 @@ control "bigquery_table_stale_data" {
         else 'ok'
       end as status,
       title || ' was changed ' || date_part('day', now() - (last_modified_time :: timestamptz)) || ' days ago.'
-      as reason,
-      project
+      as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_bigquery_table;
   EOT

@@ -66,8 +66,9 @@ control "sql_db_instance_low_connection_count" {
         when avg_max is null then 'Logging metrics not available for ' || title || '.'
         when avg_max = 0 then title || ' has not been connected to in the last ' || days || ' days.'
         else title || ' is averaging ' || avg_max || ' max connections/day in the last ' || days || ' days.'
-      end as reason,
-      project
+      end as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_sql_database_instance as i
       left join sql_db_instance_usage as u on i.project || ':' || i.name = u.instance_id;
@@ -112,8 +113,9 @@ control "sql_db_instance_low_utilization" {
       case
         when avg_max is null then 'Logging metrics not available for ' || title || '.'
         else title || ' is averaging ' || avg_max || '% max utilization over the last ' || days || ' days.'
-      end as reason,
-      i.project
+      end as reason
+      ${local.tag_dimensions_sql}
+      ${replace(local.common_dimensions_qualifier_sql, "__QUALIFIER__", "i.")}
     from
       gcp_sql_database_instance as i
       left join sql_db_instance_usage as u on i.project || ':' || i.name = u.instance_id
