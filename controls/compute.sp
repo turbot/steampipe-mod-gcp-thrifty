@@ -117,6 +117,7 @@ control "compute_disk_attached_stopped_instance" {
         when i.status = 'RUNNING' then d.name || ' attached to running instance.'
         else d.name || ' not attached to running instance.'
       end as reason
+      ${replace(local.tag_dimensions_qualifier_sql, "__QUALIFIER__", "d.")}
       ${replace(local.common_dimensions_qualifier_sql, "__QUALIFIER__", "d.")}
     from
       gcp_compute_disk as d
