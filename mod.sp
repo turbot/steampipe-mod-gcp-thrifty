@@ -31,7 +31,7 @@ locals {
   common_dimensions_qualifier_sql = <<-EOQ
   %{~ if contains(var.common_dimensions, "connection_name") }, __QUALIFIER___ctx ->> 'connection_name'%{ endif ~}
   %{~ if contains(var.common_dimensions, "location") }, __QUALIFIER__location%{ endif ~}
-    %{~ if contains(var.common_dimensions, "project") }, __QUALIFIER__project%{ endif ~}
+  %{~ if contains(var.common_dimensions, "project") }, __QUALIFIER__project%{ endif ~}
   EOQ
 
   tag_dimensions_qualifier_sql = <<-EOQ
