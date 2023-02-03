@@ -104,13 +104,38 @@ Several benchmarks have [input variables](https://steampipe.io/docs/using-steamp
 
 These are only some of the ways you can set variables. For a full list, please see [Passing Input Variables](https://steampipe.io/docs/using-steampipe/mod-variables#passing-input-variables).
 
+### Common and Tag Dimensions
+
+The benchmark queries use common properties (like `connection_name`, `location` and `project`) and tags that are defined in the form of a default list of strings in the `mod.sp` file. These properties can be overwritten in several ways:
+
+- Copy and rename the `steampipe.spvars.example` file to `steampipe.spvars`, and then modify the variable values inside that file
+- Pass in a value on the command line:
+
+  ```shell
+  steampipe check benchmark.bigquery --var 'common_dimensions=["connection_name", "location", "project"]'
+  ```
+
+  ```shell
+  steampipe check benchmark.bigquery --var 'tag_dimensions=["environment", "owner"]'
+  ```
+
+- Set an environment variable:
+
+  ```shell
+  SP_VAR_common_dimensions='["connection_name", "location", "project"]' steampipe check control.bigquery_table_stale_data
+  ```
+
+  ```shell
+  SP_VAR_tag_dimensions='["environment", "owner"]' steampipe check control.bigquery_table_stale_data
+  ```
+
 ## Contributing
 
 If you have an idea for additional controls or just want to help maintain and extend this mod ([or others](https://github.com/topics/steampipe-mod)) we would love you to join the community and start contributing.
 
 - **[Join our Slack community →](https://steampipe.io/community/join)** and hang out with other Mod developers.
 
-Please see the [contribution guidelines](https://github.com/turbot/steampipe/blob/main/CONTRIBUTING.md) and our [code of conduct](https://github.com/turbot/steampipe/blob/main/CODE_OF_CONDUCT.md). All contributions are subject to the [Apache 2.0 open source license](https://github.com/turbot/steampipe-mod-aws-thrifty/blob/main/LICENSE).
+Please see the [contribution guidelines](https://github.com/turbot/steampipe/blob/main/CONTRIBUTING.md) and our [code of conduct](https://github.com/turbot/steampipe/blob/main/CODE_OF_CONDUCT.md). All contributions are subject to the [Apache 2.0 open source license](https://github.com/turbot/steampipe-mod-gcp-thrifty/blob/main/LICENSE).
 
 Want to help but not sure where to start? Pick up one of the `help wanted` issues:
 
