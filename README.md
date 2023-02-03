@@ -116,7 +116,7 @@ The benchmark queries use common properties (like `connection_name`, `location` 
   ```
 
   ```shell
-  steampipe check benchmark.bigquery --var 'tag_dimensions=["Environment", "Owner"]'
+  steampipe check benchmark.bigquery --var 'tag_dimensions=["environment", "owner"]'
   ```
 
 - Set an environment variable:
