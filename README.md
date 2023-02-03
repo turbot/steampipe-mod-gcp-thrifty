@@ -106,13 +106,13 @@ These are only some of the ways you can set variables. For a full list, please s
 
 ### Common and Tag Dimensions
 
-The benchmark queries use common properties (like `project`, `connection_name` and `location`) and tags that are defined in the form of a default list of strings in the `mod.sp` file. These properties can be overwritten in several ways:
+The benchmark queries use common properties (like `connection_name`, `location` and `project`) and tags that are defined in the form of a default list of strings in the `mod.sp` file. These properties can be overwritten in several ways:
 
 - Copy and rename the `steampipe.spvars.example` file to `steampipe.spvars`, and then modify the variable values inside that file
 - Pass in a value on the command line:
 
   ```shell
-  steampipe check benchmark.bigquery --var 'common_dimensions=["project", "connection_name", "location"]'
+  steampipe check benchmark.bigquery --var 'common_dimensions=["connection_name", "location", "project"]'
   ```
 
   ```shell
@@ -122,7 +122,7 @@ The benchmark queries use common properties (like `project`, `connection_name` a
 - Set an environment variable:
 
   ```shell
-  SP_VAR_common_dimensions='["project", "connection_name", "location"]' steampipe check control.bigquery_table_stale_data
+  SP_VAR_common_dimensions='["connection_name", "location", "project"]' steampipe check control.bigquery_table_stale_data
   ```
 
   ```shell
