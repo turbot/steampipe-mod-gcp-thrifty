@@ -14,15 +14,15 @@ variable "common_dimensions" {
   # - connection_name (_ctx ->> 'connection_name')
   # - location
   # - project
-  default     = [ "project", "location" ]
+  default     = [ "location", "project" ]
 }
 
 variable "tag_dimensions" {
   type        = list(string)
   description = "A list of tags to add as dimensions to each control."
   # A list of tag names to include as dimensions for resources that support
-  # tags (e.g. "Owner", "Environment"). Default to empty since tag names are
-  # a personal choice - for commonly used tag names see
+  # tags (e.g. "owner", "environment"). Default to empty since tag names are
+  # a personal choice
   default     = []
 }
 
@@ -30,8 +30,8 @@ locals {
 
   common_dimensions_qualifier_sql = <<-EOQ
   %{~ if contains(var.common_dimensions, "connection_name") }, __QUALIFIER___ctx ->> 'connection_name'%{ endif ~}
-  %{~ if contains(var.common_dimensions, "project") }, __QUALIFIER__project%{ endif ~}
   %{~ if contains(var.common_dimensions, "location") }, __QUALIFIER__location%{ endif ~}
+    %{~ if contains(var.common_dimensions, "project") }, __QUALIFIER__project%{ endif ~}
   EOQ
 
   tag_dimensions_qualifier_sql = <<-EOQ
