@@ -28,20 +28,20 @@ control "logging_bucket_higher_retention_period" {
   description   = "Setting a longer retention period should be reviewed as it impacts billing."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       self_link as resource,
       case
         when retention_days > $1 then 'alarm'
         else 'ok'
       end as status,
-      title || ' retention period set to ' || retention_days || ' day(s).' as reason,
-      project
+      title || ' retention period set to ' || retention_days || ' day(s).' as reason
+      ${local.common_dimensions_sql}
     from
       gcp_logging_bucket
     where
       name != '_Required';
-  EOT
+  EOQ
 
   param "logging_bucket_max_retention_days" {
     description = "The maximum number of days allowed for bucket log retention period."

@@ -78,7 +78,7 @@ control "compute_address_unattached" {
   description   = "Unattached external IPs cost money and should be released."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       self_link as resource,
       case
@@ -88,11 +88,11 @@ control "compute_address_unattached" {
       case
         when status != 'IN_USE' then address || ' not attached.'
         else address || ' attached.'
-      end as reason,
-      project
+      end as reason
+      ${local.common_dimensions_sql}
     from
       gcp_compute_address;
-  EOT
+  EOQ
 
   tags = merge(local.storage_common_tags, {
     class = "unused"
@@ -104,7 +104,7 @@ control "compute_disk_attached_stopped_instance" {
   description   = "Instances that are stopped may no longer need any disks attached."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       d.self_link as resource,
       case
@@ -116,12 +116,13 @@ control "compute_disk_attached_stopped_instance" {
         when d.users is null then d.name || ' not attached to instance.'
         when i.status = 'RUNNING' then d.name || ' attached to running instance.'
         else d.name || ' not attached to running instance.'
-      end as reason,
-      d.project
+      end as reason
+      ${replace(local.tag_dimensions_qualifier_sql, "__QUALIFIER__", "d.")}
+      ${replace(local.common_dimensions_qualifier_sql, "__QUALIFIER__", "d.")}
     from
       gcp_compute_disk as d
       left join gcp_compute_instance as i on d.users ?& ARRAY [i.self_link];
-  EOT
+  EOQ
 
   tags = merge(local.compute_common_tags, {
     class = "deprecated"
@@ -133,18 +134,19 @@ control "compute_disk_large" {
   description   = "Large compute disks are unusual, expensive and should be reviewed."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       self_link as resource,
       case
         when size_gb <= $1 then 'ok'
         else 'info'
       end as status,
-      title || ' has ' || size_gb || ' GB.' as reason,
-      project
+      title || ' has ' || size_gb || ' GB.' as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_compute_disk;
-  EOT
+  EOQ
 
   param "compute_disk_max_size_gb" {
     description = "The maximum size (GB) allowed for disks."
@@ -161,16 +163,22 @@ control "compute_disk_low_usage" {
   description   = "Disks that are unused should be archived and deleted."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     with disk_usage as (
       select
+        project,
+        location,
         name,
+        _ctx,
         round(avg(max)) as avg_max,
         count(max) as days
       from
         (
           select
+            project,
             name,
+            location,
+            _ctx,
             cast(maximum as numeric) as max
           from
             gcp_compute_disk_metric_read_ops_daily
@@ -178,7 +186,10 @@ control "compute_disk_low_usage" {
             date_part('day', now() - timestamp) <= 30
           union all
           select
+            project,
             name,
+            location,
+            _ctx,
             cast(maximum as numeric) as max
           from
             gcp_compute_disk_metric_write_ops_daily
@@ -186,7 +197,10 @@ control "compute_disk_low_usage" {
             date_part('day', now() - timestamp) <= 30
         ) as read_and_write_ops
       group by
-        name
+        name,
+        project,
+        _ctx,
+        location
     )
     select
       name as resource,
@@ -196,9 +210,10 @@ control "compute_disk_low_usage" {
         else 'ok'
       end as status,
       name || ' is averaging ' || avg_max || ' read and write ops over the last ' || days / 2 || ' days.' as reason
+      ${local.common_dimensions_sql}
     from
       disk_usage;
-  EOT
+  EOQ
 
   param "compute_disk_avg_read_write_ops_low" {
     description = "The number of average read/write ops required for disks to be considered infrequently used. This value should be lower than compute_disk_avg_read_write_ops_high."
@@ -220,7 +235,7 @@ control "compute_disk_unattached" {
   description   = "Unattached disks cost money and should be removed unless there is a business need to retain them."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       self_link as resource,
       case
@@ -230,11 +245,12 @@ control "compute_disk_unattached" {
       case
         when users is null then title || ' has no attachments.'
         else title || ' has attachments.'
-      end as reason,
-      project
+      end as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_compute_disk;
-  EOT
+  EOQ
 
   tags = merge(local.storage_common_tags, {
     class = "unused"
@@ -246,7 +262,7 @@ control "compute_instance_large" {
   description   = "Large compute instances are unusual, expensive and should be reviewed."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       self_link as resource,
       case
@@ -254,11 +270,12 @@ control "compute_instance_large" {
         when machine_type_name like any ($1) then 'ok'
         else 'info'
       end as status,
-      title || ' has type ' || machine_type_name || ' and is ' || status || '.' as reason,
-      project
+      title || ' has type ' || machine_type_name || ' and is ' || status || '.' as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_compute_instance;
-  EOT
+  EOQ
 
   param "compute_instance_allowed_types" {
     description = "A list of allowed instance types. PostgreSQL wildcards are supported."
@@ -275,20 +292,21 @@ control "compute_instance_long_running" {
   description   = "Instances should ideally be ephemeral and rehydrated frequently, check why these instances have been running for so long."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       self_link as resource,
       case
         when date_part('day', now() - creation_timestamp) > $1 then 'info'
         else 'ok'
       end as status,
-      title || ' has been running for ' || date_part('day', now() - creation_timestamp) || ' day(s).' as reason,
-      project
+      title || ' has been running for ' || date_part('day', now() - creation_timestamp) || ' day(s).' as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_compute_instance
     where
       status in ('PROVISIONING', 'STAGING', 'RUNNING','REPAIRING');
-  EOT
+  EOQ
 
   param "compute_running_instance_age_max_days" {
     description = "The maximum number of days instances are allowed to run."
@@ -305,7 +323,7 @@ control "compute_instance_low_utilization" {
   description   = "Resize or eliminate under utilized instances."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     with compute_instance_utilization as (
       select
         name,
@@ -329,12 +347,13 @@ control "compute_instance_low_utilization" {
       case
         when avg_max is null then 'Logging metrics not available for ' || title || '.'
         else title || ' averaging ' || avg_max || '% max utilization over the last ' || days || ' days.'
-      end as reason,
-      project
+      end as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_compute_instance as i
       left join compute_instance_utilization as u on u.name = i.name;
-  EOT
+  EOQ
 
   param "compute_instance_avg_cpu_utilization_low" {
     description = "The average CPU utilization required for instances to be considered infrequently used. This value should be lower than compute_instance_avg_cpu_utilization_high."
@@ -356,18 +375,19 @@ control "compute_snapshot_max_age" {
   description   = "Old snapshots are likely unneeded and costly to maintain."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       self_link as resource,
       case
-        when creation_timestamp < (current_date - ($1 || ' days')::interval) then 'alarm'
+        when date_part('day', now()-creation_timestamp) > $1 then 'alarm'
         else 'ok'
       end as status,
-      name || ' created on ' || creation_timestamp || ' (' || date_part('day', now()-creation_timestamp) || ' days).' as reason,
-      project
+      name || ' created on ' || creation_timestamp || ' (' || date_part('day', now()-creation_timestamp) || ' days).' as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_compute_snapshot;
-  EOT
+  EOQ
 
   param "compute_snapshot_age_max_days" {
     description = "The maximum number of days snapshots can be retained."

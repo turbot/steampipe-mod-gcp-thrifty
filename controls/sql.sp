@@ -41,7 +41,7 @@ control "sql_db_instance_low_connection_count" {
   description   = "DB instances having less usage in last 30 days should be reviewed."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     with sql_db_instance_usage as (
       select
         instance_id,
@@ -66,12 +66,13 @@ control "sql_db_instance_low_connection_count" {
         when avg_max is null then 'Logging metrics not available for ' || title || '.'
         when avg_max = 0 then title || ' has not been connected to in the last ' || days || ' days.'
         else title || ' is averaging ' || avg_max || ' max connections/day in the last ' || days || ' days.'
-      end as reason,
-      project
+      end as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
     from
       gcp_sql_database_instance as i
       left join sql_db_instance_usage as u on i.project || ':' || i.name = u.instance_id;
-  EOT
+  EOQ
 
   param "sql_db_instance_avg_connections" {
     description = "The minimum number of average connections per day required for DB instances to be considered in-use."
@@ -88,7 +89,7 @@ control "sql_db_instance_low_utilization" {
   description   = "DB instances may be oversized for their usage."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     with sql_db_instance_usage as (
       select
         instance_id,
@@ -112,12 +113,13 @@ control "sql_db_instance_low_utilization" {
       case
         when avg_max is null then 'Logging metrics not available for ' || title || '.'
         else title || ' is averaging ' || avg_max || '% max utilization over the last ' || days || ' days.'
-      end as reason,
-      i.project
+      end as reason
+      ${local.tag_dimensions_sql}
+      ${replace(local.common_dimensions_qualifier_sql, "__QUALIFIER__", "i.")}
     from
       gcp_sql_database_instance as i
       left join sql_db_instance_usage as u on i.project || ':' || i.name = u.instance_id
-  EOT
+  EOQ
 
   param "sql_db_instance_avg_cpu_utilization_low" {
     description = "The average CPU utilization required for DB instances to be considered infrequently used. This value should be lower than sql_db_instance_avg_cpu_utilization_high."
