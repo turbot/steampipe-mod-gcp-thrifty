@@ -22,7 +22,7 @@ control "storage_bucket_without_lifecycle_policy" {
   description   = "Buckets should have a lifecycle policy associated for data retention."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       self_link as resource,
       case
@@ -37,7 +37,7 @@ control "storage_bucket_without_lifecycle_policy" {
       ${local.common_dimensions_sql}
     from
       gcp_storage_bucket;
-  EOT
+  EOQ
 
   tags = merge(local.storage_common_tags, {
     class = "managed"

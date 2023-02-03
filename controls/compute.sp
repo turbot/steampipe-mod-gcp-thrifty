@@ -78,7 +78,7 @@ control "compute_address_unattached" {
   description   = "Unattached external IPs cost money and should be released."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       self_link as resource,
       case
@@ -92,7 +92,7 @@ control "compute_address_unattached" {
       ${local.common_dimensions_sql}
     from
       gcp_compute_address;
-  EOT
+  EOQ
 
   tags = merge(local.storage_common_tags, {
     class = "unused"
@@ -104,7 +104,7 @@ control "compute_disk_attached_stopped_instance" {
   description   = "Instances that are stopped may no longer need any disks attached."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       d.self_link as resource,
       case
@@ -122,7 +122,7 @@ control "compute_disk_attached_stopped_instance" {
     from
       gcp_compute_disk as d
       left join gcp_compute_instance as i on d.users ?& ARRAY [i.self_link];
-  EOT
+  EOQ
 
   tags = merge(local.compute_common_tags, {
     class = "deprecated"
@@ -134,7 +134,7 @@ control "compute_disk_large" {
   description   = "Large compute disks are unusual, expensive and should be reviewed."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       self_link as resource,
       case
@@ -146,7 +146,7 @@ control "compute_disk_large" {
       ${local.common_dimensions_sql}
     from
       gcp_compute_disk;
-  EOT
+  EOQ
 
   param "compute_disk_max_size_gb" {
     description = "The maximum size (GB) allowed for disks."
@@ -163,7 +163,7 @@ control "compute_disk_low_usage" {
   description   = "Disks that are unused should be archived and deleted."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     with disk_usage as (
       select
         project,
@@ -213,7 +213,7 @@ control "compute_disk_low_usage" {
       ${local.common_dimensions_sql}
     from
       disk_usage;
-  EOT
+  EOQ
 
   param "compute_disk_avg_read_write_ops_low" {
     description = "The number of average read/write ops required for disks to be considered infrequently used. This value should be lower than compute_disk_avg_read_write_ops_high."
@@ -235,7 +235,7 @@ control "compute_disk_unattached" {
   description   = "Unattached disks cost money and should be removed unless there is a business need to retain them."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       self_link as resource,
       case
@@ -250,7 +250,7 @@ control "compute_disk_unattached" {
       ${local.common_dimensions_sql}
     from
       gcp_compute_disk;
-  EOT
+  EOQ
 
   tags = merge(local.storage_common_tags, {
     class = "unused"
@@ -262,7 +262,7 @@ control "compute_instance_large" {
   description   = "Large compute instances are unusual, expensive and should be reviewed."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       self_link as resource,
       case
@@ -275,7 +275,7 @@ control "compute_instance_large" {
       ${local.common_dimensions_sql}
     from
       gcp_compute_instance;
-  EOT
+  EOQ
 
   param "compute_instance_allowed_types" {
     description = "A list of allowed instance types. PostgreSQL wildcards are supported."
@@ -292,7 +292,7 @@ control "compute_instance_long_running" {
   description   = "Instances should ideally be ephemeral and rehydrated frequently, check why these instances have been running for so long."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       self_link as resource,
       case
@@ -306,7 +306,7 @@ control "compute_instance_long_running" {
       gcp_compute_instance
     where
       status in ('PROVISIONING', 'STAGING', 'RUNNING','REPAIRING');
-  EOT
+  EOQ
 
   param "compute_running_instance_age_max_days" {
     description = "The maximum number of days instances are allowed to run."
@@ -323,7 +323,7 @@ control "compute_instance_low_utilization" {
   description   = "Resize or eliminate under utilized instances."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     with compute_instance_utilization as (
       select
         name,
@@ -353,7 +353,7 @@ control "compute_instance_low_utilization" {
     from
       gcp_compute_instance as i
       left join compute_instance_utilization as u on u.name = i.name;
-  EOT
+  EOQ
 
   param "compute_instance_avg_cpu_utilization_low" {
     description = "The average CPU utilization required for instances to be considered infrequently used. This value should be lower than compute_instance_avg_cpu_utilization_high."
@@ -375,7 +375,7 @@ control "compute_snapshot_max_age" {
   description   = "Old snapshots are likely unneeded and costly to maintain."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     select
       self_link as resource,
       case
@@ -387,7 +387,7 @@ control "compute_snapshot_max_age" {
       ${local.common_dimensions_sql}
     from
       gcp_compute_snapshot;
-  EOT
+  EOQ
 
   param "compute_snapshot_age_max_days" {
     description = "The maximum number of days snapshots can be retained."

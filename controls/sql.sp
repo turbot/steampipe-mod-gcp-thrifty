@@ -41,7 +41,7 @@ control "sql_db_instance_low_connection_count" {
   description   = "DB instances having less usage in last 30 days should be reviewed."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     with sql_db_instance_usage as (
       select
         instance_id,
@@ -72,7 +72,7 @@ control "sql_db_instance_low_connection_count" {
     from
       gcp_sql_database_instance as i
       left join sql_db_instance_usage as u on i.project || ':' || i.name = u.instance_id;
-  EOT
+  EOQ
 
   param "sql_db_instance_avg_connections" {
     description = "The minimum number of average connections per day required for DB instances to be considered in-use."
@@ -89,7 +89,7 @@ control "sql_db_instance_low_utilization" {
   description   = "DB instances may be oversized for their usage."
   severity      = "low"
 
-  sql = <<-EOT
+  sql = <<-EOQ
     with sql_db_instance_usage as (
       select
         instance_id,
@@ -119,7 +119,7 @@ control "sql_db_instance_low_utilization" {
     from
       gcp_sql_database_instance as i
       left join sql_db_instance_usage as u on i.project || ':' || i.name = u.instance_id
-  EOT
+  EOQ
 
   param "sql_db_instance_avg_cpu_utilization_low" {
     description = "The average CPU utilization required for DB instances to be considered infrequently used. This value should be lower than sql_db_instance_avg_cpu_utilization_high."

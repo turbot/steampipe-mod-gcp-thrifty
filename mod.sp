@@ -11,16 +11,19 @@ variable "common_dimensions" {
   type        = list(string)
   description = "A list of common dimensions to add to each control."
   # Define which common dimensions should be added to each control.
-  # - project
   # - connection_name (_ctx ->> 'connection_name')
   # - location
-  default     = [ "project", "location", "connection_name"]
+  # - project
+  default     = [ "project", "location" ]
 }
 
 variable "tag_dimensions" {
   type        = list(string)
   description = "A list of tags to add as dimensions to each control."
-  default     = [ "Owner" ]
+  # A list of tag names to include as dimensions for resources that support
+  # tags (e.g. "Owner", "Environment"). Default to empty since tag names are
+  # a personal choice - for commonly used tag names see
+  default     = []
 }
 
 locals {
