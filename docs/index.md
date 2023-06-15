@@ -12,7 +12,7 @@ Be Thrifty on GCP! This mod checks for unused resources and opportunities to opt
 
 ## References
 
-[GCP](https://cloud.google.com) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis. 
+[GCP](https://cloud.google.com) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis.
 
 [Steampipe](https://steampipe.io) is an open source CLI to instantly query cloud APIs using SQL.
 
@@ -56,7 +56,7 @@ steampipe dashboard
 ```
 
 By default, the dashboard interface will then be launched in a new browser
-window at https://localhost:9194. From here, you can run benchmarks by
+window at http://localhost:9194. From here, you can run benchmarks by
 selecting one or searching for a specific one.
 
 Instead of running benchmarks in a dashboard, you can also run them within your
