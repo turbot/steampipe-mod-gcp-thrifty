@@ -7,11 +7,14 @@ A GCP cost savings and waste checking tool.
 
 Run checks in a dashboard:
 
-![image](https://raw.githubusercontent.com/turbot/steampipe-mod-gcp-thrifty/main/docs/gcp_thrifty_dashboard.png)
+<!-- ![image](https://raw.githubusercontent.com/turbot/steampipe-mod-gcp-thrifty/main/docs/gcp_thrifty_dashboard.png) -->
+![image](https://raw.githubusercontent.com/turbot/steampipe-mod-gcp-thrifty/add-new-checks/docs/gcp_thrifty_dashboard.png)
+
 
 Or in a terminal:
 
-![image](https://raw.githubusercontent.com/turbot/steampipe-mod-gcp-thrifty/main/docs/gcp_thrifty_console_graphic.png)
+<!-- ![image](https://raw.githubusercontent.com/turbot/steampipe-mod-gcp-thrifty/main/docs/gcp_thrifty_console_graphic.png) -->
+![image](https://raw.githubusercontent.com/turbot/steampipe-mod-gcp-thrifty/add-new-checks/docs/gcp_thrifty_console_graphic.png)
 
 Includes checks for:
 
@@ -51,7 +54,7 @@ Finally, install the mod:
 mkdir dashboards
 cd dashboards
 powerpipe mod init
-powerpipe mod install github.com/turbot/powerpipe-mod-gcp-thrifty
+powerpipe mod install github.com/turbot/steampipe-mod-gcp-thrifty
 ```
 
 ### Browsing Dashboards
@@ -114,7 +117,9 @@ export PP_VAR_bigquery_table_stale_data_max_days=90
 powerpipe benchmark run gcp_thrifty.benchmark.bigquery
 ```
 
-These are only some of the ways you can set variables. For a full list, please see [Passing Input Variables](https://powerpipe.io/docs/using-steampipe/mod-variables#passing-input-variables).
+  - Note: When using environment variables, if the variable is defined in `powerpipe.ppvars` or passed in through the command line, either of those will take precedence over the environment variable value. For more information on variable definition precedence, please see the link below.
+
+These are only some of the ways you can set variables. For a full list, please see [Passing Input Variables](https://powerpipe.io/docs/build/mod-variables#passing-input-variables).
 
 ### Common and Tag Dimensions
 
