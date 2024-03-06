@@ -9,7 +9,7 @@ mod "gcp_thrifty" {
 
   opengraph {
     title       = "Powerpipe mod for GCP Thrifty"
-    description = "Are you a Thrifty GCP dev? This mod checks your GCP project(s) for unused and under-utilized resources using Powerpipe and Steampipe."
+    description = "Are you a Thrifty GCP developer? This mod checks your GCP project(s) for unused and under-utilized resources using Powerpipe and Steampipe."
     image       = "/images/mods/turbot/gcp-thrifty-social-graphic.png"
   }
 }
