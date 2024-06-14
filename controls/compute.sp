@@ -65,7 +65,10 @@ benchmark "compute" {
     control.compute_instance_large,
     control.compute_instance_long_running,
     control.compute_instance_low_utilization,
-    control.compute_snapshot_max_age
+    control.compute_snapshot_max_age,
+    control.compute_instance_group_unused,
+    control.compute_vpn_gateway_unused,
+    control.compute_node_group_without_autoscaling,
   ]
 
   tags = merge(local.compute_common_tags, {
@@ -393,6 +396,85 @@ control "compute_snapshot_max_age" {
     description = "The maximum number of days snapshots can be retained."
     default     = var.compute_snapshot_age_max_days
   }
+
+  tags = merge(local.compute_common_tags, {
+    class = "unused"
+  })
+}
+
+control "compute_instance_group_unused" {
+  title       = "Unused compute instance groups should be removed"
+  description = "Compute instance groups that have been not attached to any compute intances should be reviewed as these instance groups are billed hourly, you should consider reconfiguring or deleting them if you don't intend to use them anymore."
+  severity      = "low"
+
+  sql = <<-EOQ
+    select
+      self_link as resource,
+      case
+        when jsonb_array_length(instances) > 0 then 'ok'
+        else 'alarm'
+      end as status,
+      case
+        when jsonb_array_length(instances) > 0 then title || ' attached to ' || (jsonb_array_length(instances)) || ' instances.'
+        else title || ' not attached to any instance.'
+      end as reason
+      ${local.tag_dimensions_sql}
+      ${local.common_dimensions_sql}
+    from
+      gcp_compute_instance_group
+  EOQ
+
+  tags = merge(local.compute_common_tags, {
+    class = "unused"
+  })
+}
+
+control "compute_vpn_gateway_unused" {
+  title       = "Unused VPN gateway should be removed"
+  description = "Compute VPN gateway that have been not attached to any tunnels should be reviewed as these are billed, you should consider reconfiguring or deleting them if you don't intend to use them anymore."
+  severity      = "low"
+
+  sql = <<-EOQ
+    select
+      self_link as resource,
+      case
+        when tunnels is not null then 'ok'
+        else 'alarm'
+      end as status,
+      case
+        when tunnels is not null then title || ' has tunnels attached.'
+        else title || ' has no tunnels attached.'
+      end as reason
+      ${local.common_dimensions_sql}
+    from
+      gcp_compute_target_vpn_gateway;
+  EOQ
+
+  tags = merge(local.compute_common_tags, {
+    class = "unused"
+  })
+}
+
+control "compute_node_group_without_autoscaling" {
+  title       = "Compute node group should use autoscaling policy"
+  description = "Compute node group should use autoscaling policy to improve service performance in a cost-efficient way."
+  severity      = "low"
+
+  sql = <<-EOQ
+    select
+      self_link as resource,
+      case
+        when autoscaling_policy_mode = 'ON' then 'ok'
+        else 'alarm'
+      end as status,
+      case
+        when autoscaling_policy_mode = 'ON' then title || ' autoscaling enabled.'
+        else title || ' autoscaling disabled.'
+      end as reason
+      ${local.common_dimensions_sql}
+    from
+    gcp_compute_node_group;
+  EOQ
 
   tags = merge(local.compute_common_tags, {
     class = "unused"
