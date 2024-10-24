@@ -1,3 +1,9 @@
+## v1.0.1 [2024-10-24]
+
+_Bug fixes_
+
+- Renamed `steampipe.spvars.example` files to `powerpipe.ppvars.example` and updated documentation. ([#53](https://github.com/turbot/steampipe-mod-gcp-thrifty/pull/53))
+
 ## v1.0.0 [2024-10-22]
 
 This mod now requires [Powerpipe](https://powerpipe.io). [Steampipe](https://steampipe.io) users should check the [migration guide](https://powerpipe.io/blog/migrating-from-steampipe).
